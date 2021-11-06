@@ -9,6 +9,8 @@ use pocketmine\item\ItemFactory;
 use pocketmine\item\ItemIds;
 use pocketmine\level\Level;
 use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\network\mcpe\protocol\types\inventory\ItemStackWrapper;
+use pocketmine\item\Item;
 use pocketmine\network\mcpe\protocol\AddActorPacket as AddEntityPacket;
 use pocketmine\network\mcpe\protocol\AddPlayerPacket;
 use pocketmine\network\mcpe\protocol\MoveActorAbsolutePacket as MoveEntityAbsolutePacket;
@@ -58,7 +60,7 @@ class SlapperEntity extends Entity {
         $pk2->uuid = UUID::fromRandom();
         $pk2->username = $this->getDisplayName($player);
         $pk2->position = $this->asVector3()->add(0, static::HEIGHT);
-        $pk2->item = ItemFactory::get(ItemIds::AIR);
+		$pk2->item = ItemStackWrapper::legacy(Item::get(ItemIds::AIR));
         $pk2->metadata = [self::DATA_SCALE => [self::DATA_TYPE_FLOAT, 0.0]];
 
         $player->dataPacket($pk2);

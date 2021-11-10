@@ -16,6 +16,7 @@ Compatibility with unofficial variants can occasionally be found, but **do not e
 Official addons:
 - [SlapperRotation](https://github.com/Vecnavium/SlapperRotation)
 - [SlapperCooldown](https://github.com/Vecnavium/SlapperCooldown)
+- [SlapBack](https://github.com/Vecnavium/SlapBack)
 
 
 

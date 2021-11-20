@@ -581,9 +581,11 @@ class Main extends PluginBase implements Listener {
                                 return true;
                             }
                             $nbt = $this->makeNBT($chosenType, $sender, $name);
+                            $slapperClass = "Slapper$chosenType";
+                            assert(is_a($slapperClass, SlapperEntity::class, true));
                             /** @var SlapperEntity $entity */
-                            $entity = Entity::createEntity("Slapper" . $chosenType, $sender->getLevel(), $nbt);
-                            $this->getServer()->getPluginManager()->callEvent(new SlapperCreationEvent($entity, "Slapper" . $chosenType, $sender, SlapperCreationEvent::CAUSE_COMMAND));
+                            $entity = new $slapperClass($sender->getLocation(), $nbt, $this);
+                            $this->getServer()->getPluginManager()->callEvent(new SlapperCreationEvent($entity, $slapperClass, $sender, SlapperCreationEvent::CAUSE_COMMAND));
                             $entity->spawnToAll();
                             $sender->sendMessage($this->prefix . $chosenType . " entity spawned with name " . TextFormat::WHITE . "\"" . TextFormat::BLUE . $name . TextFormat::WHITE . "\"" . TextFormat::GREEN . " and entity ID " . TextFormat::BLUE . $entity->getId());
                             return true;
@@ -598,6 +600,34 @@ class Main extends PluginBase implements Listener {
         }
         return true;
     }
+
+	/**
+	 * @param string $type
+	 * @param Player $player
+	 * @param string $name
+	 *
+	 * @return CompoundTag
+	 */
+	private function makeNBT(string $type, Player $player, ?string $name = null): CompoundTag {
+		$nbt = CompoundTag::create()
+			->setShort("Health", 1)
+			->setString(CompoundTag::create("Commands", []))
+			->setString("MenuName", "")
+			->setString("CustomName", $name)
+			->setString("SlapperVersion", $this->getDescription()->getVersion());
+		if ($type === "Human") {
+			$playerNBT = $player->saveNBT();
+
+			$inventoryTag = $playerNBT->getListTag("Inventory");
+			assert($inventoryTag !== null);
+			$nbt->setTag(clone $inventoryTag);
+
+			$skinTag = $playerNBT->getCompoundTag("Skin");
+			assert($skinTag !== null);
+			$nbt->setTag(clone $skinTag);
+		}
+		return $nbt;
+	}
 
     /**
      * @param EntityDamageEvent $event

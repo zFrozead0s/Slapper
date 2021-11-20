@@ -9,37 +9,71 @@ use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\command\ConsoleCommandSender;
 use pocketmine\entity\Entity;
+use pocketmine\entity\EntityFactory;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntitySpawnEvent;
 use pocketmine\event\entity\EntityMotionEvent;
 use pocketmine\event\Listener;
 use pocketmine\item\Item;
-
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\StringTag;
-use pocketmine\Player;
+use pocketmine\nbt\tag\DoubleTag;
+use pocketmine\nbt\tag\FloatTag;
+use pocketmine\nbt\tag\ListTag;
+use pocketmine\math\Vector3;
+use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\TextFormat;
-
-use slapper\entities\other\{
-    SlapperBoat, SlapperFallingSand, SlapperMinecart, SlapperPrimedTNT
-};
-use slapper\entities\{
-    SlapperBat, SlapperBlaze, SlapperCaveSpider, SlapperChicken,
-    SlapperCow, SlapperCreeper, SlapperDonkey, SlapperElderGuardian,
-    SlapperEnderman, SlapperEndermite, SlapperEntity, SlapperEvoker,
-    SlapperGhast, SlapperGuardian, SlapperHorse, SlapperHuman,
-    SlapperHusk, SlapperIronGolem, SlapperLavaSlime, SlapperLlama,
-    SlapperMule, SlapperMushroomCow, SlapperOcelot, SlapperPig,
-    SlapperPigZombie, SlapperPolarBear, SlapperRabbit, SlapperSheep,
-    SlapperShulker, SlapperSilverfish, SlapperSkeleton, SlapperSkeletonHorse,
-    SlapperSlime, SlapperSnowman, SlapperSpider, SlapperSquid,
-    SlapperStray, SlapperVex, SlapperVillager, SlapperVindicator,
-    SlapperWitch, SlapperWither, SlapperWitherSkeleton, SlapperWolf,
-    SlapperZombie, SlapperZombieHorse, SlapperZombieVillager
-};
-
+use slapper\entities\other\SlapperBoat;
+use slapper\entities\other\SlapperFallingSand;
+use slapper\entities\other\SlapperMinecart;
+use slapper\entities\other\SlapperPrimedTNT;
+use slapper\entities\SlapperBat;
+use slapper\entities\SlapperBlaze;
+use slapper\entities\SlapperCaveSpider;
+use slapper\entities\SlapperChicken;
+use slapper\entities\SlapperCow;
+use slapper\entities\SlapperCreeper;
+use slapper\entities\SlapperDonkey;
+use slapper\entities\SlapperElderGuardian;
+use slapper\entities\SlapperEnderman;
+use slapper\entities\SlapperEndermite;
+use slapper\entities\SlapperEntity;
+use slapper\entities\SlapperEvoker;
+use slapper\entities\SlapperGhast;
+use slapper\entities\SlapperGuardian;
+use slapper\entities\SlapperHorse;
+use slapper\entities\SlapperHuman;
+use slapper\entities\SlapperSlapperIronGolemHusk;
+use slapper\entities\SlapperLavaSlime;
+use slapper\entities\SlapperLlama;
+use slapper\entities\SlapperMule;
+use slapper\entities\SlapperMushroomCow;
+use slapper\entities\SlapperOcelot;
+use slapper\entities\SlapperPig;
+use slapper\entities\SlapperPigZombie;
+use slapper\entities\SlapperPolarBear;
+use slapper\entities\SlapperRabbit;
+use slapper\entities\SlapperSheep;
+use slapper\entities\SlapperShulker;
+use slapper\entities\SlapperSilverfish;
+use slapper\entities\SlapperSkeletonHorse;
+use slapper\entities\SlapperSkeleton;
+use slapper\entities\SlapperSlime;
+use slapper\entities\SlapperSnowman;
+use slapper\entities\SlapperSpider;
+use slapper\entities\SlapperSquid;
+use slapper\entities\SlapperStray;
+use slapper\entities\SlapperVex;
+use slapper\entities\SlapperVillager;
+use slapper\entities\SlapperVindicator;
+use slapper\entities\SlapperWitch;
+use slapper\entities\SlapperWither;
+use slapper\entities\SlapperWitherSkeleton;
+use slapper\entities\SlapperWolf;
+use slapper\entities\SlapperZombie;
+use slapper\entities\SlapperZombieHorse;
+use slapper\entities\SlapperZombieVillager;
 use slapper\events\SlapperCreationEvent;
 use slapper\events\SlapperDeletionEvent;
 use slapper\events\SlapperHitEvent;
@@ -123,29 +157,35 @@ class Main extends PluginBase implements Listener {
      * @return void
      */
     public function onEnable(): void {
-        foreach ([
-                     SlapperCreeper::class, SlapperBat::class, SlapperSheep::class,
-                     SlapperPigZombie::class, SlapperGhast::class, SlapperBlaze::class,
-                     SlapperIronGolem::class, SlapperSnowman::class, SlapperOcelot::class,
-                     SlapperZombieVillager::class, SlapperHuman::class, SlapperCow::class,
-                     SlapperZombie::class, SlapperSquid::class, SlapperVillager::class,
-                     SlapperSpider::class, SlapperPig::class, SlapperMushroomCow::class,
-                     SlapperWolf::class, SlapperLavaSlime::class, SlapperSilverfish::class,
-                     SlapperSkeleton::class, SlapperSlime::class, SlapperChicken::class,
-                     SlapperEnderman::class, SlapperCaveSpider::class, SlapperBoat::class,
-                     SlapperMinecart::class, SlapperMule::class, SlapperWitch::class,
-                     SlapperPrimedTNT::class, SlapperHorse::class, SlapperDonkey::class,
-                     SlapperSkeletonHorse::class, SlapperZombieHorse::class, SlapperRabbit::class,
-                     SlapperStray::class, SlapperHusk::class, SlapperWitherSkeleton::class,
-                     SlapperFallingSand::class, SlapperElderGuardian::class, SlapperEndermite::class,
-                     SlapperEvoker::class, SlapperGuardian::class, SlapperLlama::class,
-                     SlapperPolarBear::class, SlapperShulker::class, SlapperVex::class,
-                     SlapperVindicator::class, SlapperWither::class
-                 ] as $className) {
-            Entity::registerEntity($className, true);
-        }
-        $this->getServer()->getPluginManager()->registerEvents($this, $this);
-    }
+		$this->getServer()->getPluginManager()->registerEvents($this, $this);
+		$this->registerEntities();
+			}
+
+			public function registerEntities()
+			{
+				foreach ([
+							 SlapperCreeper::class, SlapperBat::class, SlapperSheep::class,
+							 SlapperPigZombie::class, SlapperGhast::class, SlapperBlaze::class,
+							 SlapperIronGolem::class, SlapperSnowman::class, SlapperOcelot::class,
+							 SlapperZombieVillager::class, SlapperHuman::class, SlapperCow::class,
+							 SlapperZombie::class, SlapperSquid::class, SlapperVillager::class,
+							 SlapperSpider::class, SlapperPig::class, SlapperMushroomCow::class,
+							 SlapperWolf::class, SlapperLavaSlime::class, SlapperSilverfish::class,
+							 SlapperSkeleton::class, SlapperSlime::class, SlapperChicken::class,
+							 SlapperEnderman::class, SlapperCaveSpider::class, SlapperBoat::class,
+							 SlapperMinecart::class, SlapperMule::class, SlapperWitch::class,
+							 SlapperPrimedTNT::class, SlapperHorse::class, SlapperDonkey::class,
+							 SlapperSkeletonHorse::class, SlapperZombieHorse::class, SlapperRabbit::class,
+							 SlapperStray::class, SlapperHusk::class, SlapperWitherSkeleton::class,
+							 SlapperFallingSand::class, SlapperElderGuardian::class, SlapperEndermite::class,
+							 SlapperEvoker::class, SlapperGuardian::class, SlapperLlama::class,
+							 SlapperPolarBear::class, SlapperShulker::class, SlapperVex::class,
+							 SlapperVindicator::class, SlapperWither::class
+						 ] as $className);
+					}
+
+
+
 
     /**
      * @param CommandSender $sender
@@ -512,10 +552,6 @@ class Main extends PluginBase implements Listener {
                         case "spawn":
                         case "apawn":
                         case "spanw":
-                            if (!$sender->hasPermission("slapper.create")) {
-                                $sender->sendMessage($this->noperm);
-                                return true;
-                            }
                             $type = array_shift($args);
                             $name = str_replace(["{color}", "{line}"], ["§", "\n"], trim(implode(" ", $args)));
                             if ($type === null || empty(trim($type))) {
@@ -561,34 +597,6 @@ class Main extends PluginBase implements Listener {
                 }
         }
         return true;
-    }
-
-    /**
-     * @param string $type
-     * @param Player $player
-     * @param string $name
-     *
-     * @return CompoundTag
-     */
-    private function makeNBT($type, Player $player, string $name): CompoundTag {
-        $nbt = Entity::createBaseNBT($player, null, $player->getYaw(), $player->getPitch());
-        $nbt->setShort("Health", 1);
-        $nbt->setTag(new CompoundTag("Commands", []));
-        $nbt->setString("MenuName", "");
-        $nbt->setString("CustomName", $name);
-        $nbt->setString("SlapperVersion", $this->getDescription()->getVersion());
-        if ($type === "Human") {
-            $player->saveNBT();
-
-            $inventoryTag = $player->namedtag->getListTag("Inventory");
-            assert($inventoryTag !== null);
-            $nbt->setTag(clone $inventoryTag);
-
-            $skinTag = $player->namedtag->getCompoundTag("Skin");
-            assert($skinTag !== null);
-            $nbt->setTag(clone $skinTag);
-        }
-        return $nbt;
     }
 
     /**
@@ -665,4 +673,10 @@ class Main extends PluginBase implements Listener {
             $event->setCancelled(true);
         }
     }
+
+	public static function getInstance(): Main
+	{
+		return self::$instance;
+	}
+
 }

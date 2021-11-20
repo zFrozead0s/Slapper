@@ -7,6 +7,7 @@ namespace slapper\entities;
 use pocketmine\entity\Entity;
 use pocketmine\item\ItemFactory;
 use pocketmine\item\ItemIds;
+use pocketmine\world\Location;
 use pocketmine\world\World;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\protocol\types\inventory\ItemStackWrapper;
@@ -31,11 +32,11 @@ class SlapperEntity extends Entity {
     /** @var int */
     private $tagId;
 
-    public function __construct(Main $plugin, Level $level, CompoundTag $nbt) {
+    public function __construct(Location $location, CompoundTag $nbt, Main $plugin) {
         $this->height = static::HEIGHT;
         $this->width = $this->width ?? 1; //polyfill
         $this->tagId = Entity::$entityCount++;
-        parent::__construct($level, $nbt);
+        parent::__construct($location, $nbt);
         $this->prepareMetadata();
         $this->setNameTagVisible(false);
 		$this->plugin = $plugin;
@@ -83,52 +84,7 @@ class SlapperEntity extends Entity {
         $player->dataPacket($pk);
     }
 
-	/**
-	 * @param string $type
-	 * @param Player $player
-	 * @param string $name
-	 *
-	 * @return CompoundTag
-	 */
-	private function makeNBT(string $type, Player $player, ?string $name = null): CompoundTag {
-		$nbt = $this->CreateBaseNBT($player->getLocation(), null, $player->getLocation()->getYaw(), $player->getLocation()->getPitch());
-		$nbt->setShort("Health", 1);
-		$nbt->setString(CompoundTag::create("Commands", []));
-		$nbt->setString("MenuName", "");
-		$nbt->setString("CustomName", $name);
-		$nbt->setString("SlapperVersion", $this->getDescription()->getVersion());
-		if ($type === "Human") {
-			$player->saveNBT();
 
-			$inventoryTag = $player->namedtag->getListTag("Inventory");
-			assert($inventoryTag !== null);
-			$nbt->setTag(clone $inventoryTag);
-
-			$skinTag = $player->namedtag->getCompoundTag("Skin");
-			assert($skinTag !== null);
-			$nbt->setTag(clone $skinTag);
-		}
-		return $nbt;
-	}
-
-	public function createBaseNBT(Vector3 $pos, ?Vector3 $motion = null, float $yaw = 0.0, float $pitch = 0.0) : CompoundTag
-	{
-		CompoundTag::create()
-			->setTag("Pos", new ListTag([
-				new DoubleTag($this->location->x),
-				new DoubleTag($this->location->y),
-				new DoubleTag($this->location->z)
-			]))
-			->setTag("Motion", new ListTag([
-				new DoubleTag($this->motion->x),
-				new DoubleTag($this->motion->y),
-				new DoubleTag($this->motion->z)
-			]))
-			->setTag("Rotation", new ListTag([
-				new FloatTag($this->location->yaw),
-				new FloatTag($this->location->pitch)
-			]));
-	}
 
     public function broadcastMovement(bool $teleport = false): void {
         if($this->chunk !== null) {

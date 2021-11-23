@@ -1,11 +1,13 @@
-# Slapper
-[![Discord](https://img.shields.io/discord/837701868649709568.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/jWFB56RqUN)
-[![](https://poggit.pmmp.io/shield.state/Slapper)](https://poggit.pmmp.io/p/Slapper)
-[![](https://poggit.pmmp.io/shield.api/Slapper)](https://poggit.pmmp.io/p/Slapper)
-[![](https://poggit.pmmp.io/shield.dl/Slapper)](https://poggit.pmmp.io/p/Slapper)
-[![](https://poggit.pmmp.io/shield.dl.total/Slapper)](https://poggit.pmmp.io/p/Slapper)
+<p align="center">
+    <a href="https://github.com/Vecnavium/Slapper"><img src="https://github.com/Vecnavium/Slapper/blob/stable/icon.png"></img></a><br>
+    <b>The new home of Slapper, the NPC plugin for PocketMine-MP.</b>
+</p>
 
-The new home of Slapper, the NPC plugin for PocketMine-MP.
+<p align="center">
+    <img alt="GitHubrelease" src="https://img.shields.io/github/v/release/Vecnavium/Slapper?label=release&sort=semver">
+      <img alt="Stars" src= "https://img.shields.io/github/stars/Vecnavium/Slapper?style=for-the-badge">
+    <img href="https://discord.gg/6M9tGyWPjr"><img src="https://img.shields.io/discord/837701868649709568?label=discord&color=7289DA&logo=discord" alt="Discord" /></a>
+</p>
 
 ## NOTE
 This plugin is designed for **[PocketMine-MP](https://github.com/pmmp/PocketMine-MP)** only and we do not support any other variations, forks or spoons.

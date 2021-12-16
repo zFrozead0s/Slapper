@@ -6,11 +6,13 @@ namespace slapper\entities;
 
 use pocketmine\entity\Human;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\network\mcpe\protocol\SetActorDataPacket as SetEntityDataPacket;
+use pocketmine\network\mcpe\convert\SkinAdapterSingleton;
+use pocketmine\network\mcpe\protocol\PlayerListPacket;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataCollection;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataProperties;
 use pocketmine\network\mcpe\protocol\types\entity\MetadataProperty;
 use pocketmine\network\mcpe\protocol\types\entity\StringMetadataProperty;
+use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
 use pocketmine\player\Player;
 use slapper\SlapperTrait;
 
@@ -58,7 +60,7 @@ class SlapperHuman extends Human {
         parent::sendSpawnPacket($player);
 
         if ($this->menuName !== "") {
-            $this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->menuName, $this->skin, "", [$this]);
+        	$player->getNetworkSession()->sendDataPacket(PlayerListPacket::add([PlayerListEntry::createAdditionEntry($this->getUniqueId(), $this->getId(), $this->menuName, SkinAdapterSingleton::get()->toSkinData($this->getSkin()), '')]));
         }
     }
 }

@@ -6,7 +6,7 @@ namespace slapper\entities\other;
 
 use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
-use pocketmine\data\bedrock\EntityIds;
+use pocketmine\data\bedrock\EntityLegacyIds;
 use pocketmine\entity\object\FallingBlock;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\convert\RuntimeBlockMapping;
@@ -29,7 +29,7 @@ class SlapperFallingSand extends SlapperEntity {
 		if(($blockIdTag = $nbt->getTag("BlockID")) === null){
 			$this->block = FallingBlock::parseBlockNBT($blockFactory, $nbt);
 		}else{
-			$this->block = $blockFactory->get($blockIdTag->getValue());
+			$this->block = $blockFactory->get($blockIdTag->getValue(), 0);
 		}
 	}
 

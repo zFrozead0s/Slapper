@@ -195,9 +195,10 @@ class Main extends PluginBase implements Listener {
 				throw new AssumptionFailedError("$className should always contain the word 'Slapper'");
 			}
 			$entityName = substr($className, $stringPos);
-			$entityFactory->register($className, function(World $world, CompoundTag $nbt) use($className): SlapperEntity{
+			$entityFactory->register($className, static function(World $world, CompoundTag $nbt) use($className): SlapperEntity{
 				/** @var SlapperEntity $entityClass */
-				$entityClass = new $className(EntityDataHelper::parseLocation($world, $nbt), $this, $nbt);
+				$entityClass = new $className(EntityDataHelper::parseLocation($world, $nbt), $nbt);
+				return $entityClass;
 			}, [$entityName], $className::getNetworkTypeId());
 		}
 		$entityFactory->register(SlapperHuman::class, static function(World $world, CompoundTag $nbt): SlapperHuman{
@@ -623,10 +624,15 @@ class Main extends PluginBase implements Listener {
 
                             $slapperClass = __NAMESPACE__ . "entities\\Slapper$chosenType";
                             Utils::testValidInstance($slapperClass, SlapperEntity::class);
-                            /** @var SlapperEntity $entity */
-                            $entity = is_a($slapperClass, SlapperHuman::class, true) ?
-                            	new $slapperClass($sender->getLocation(), $this, $sender->getSkin()) :
-                            	new $slapperClass($sender->getLocation(), $this);
+
+							$location = $sender->getLocation();
+                            if(is_a($slapperClass, SlapperHuman::class, true)){
+                            	/** @var SlapperHuman $entity */
+                            	$entity = new $slapperClass($location, $sender->getSkin());
+                            }else{
+                            	/** @var SlapperEntity $entity */
+                            	$entity = new $slapperClass($location);
+                            }
                             $entity->setNameTag($name);
                             $entity->setSlapperVersion($this->getDescription()->getVersion());
                             if($entity instanceof SlapperHuman){
@@ -685,10 +691,10 @@ class Main extends PluginBase implements Listener {
                 return;
             }
 
-            if (($commands = $entity->getCommands()) > 0) {
+            if (count($commands = $entity->getCommands()) > 0) {
                 $server = $this->getServer();
                 foreach ($commands as $command) {
-                    $server->dispatchCommand($this->commandSender, str_replace("{player}", '"' . $damagerName . '"', $stringTag->getValue()));
+                    $server->dispatchCommand($this->commandSender, str_replace("{player}", '"' . $damagerName . '"', $command));
                 }
             }
         }

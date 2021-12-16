@@ -8,7 +8,7 @@ use pocketmine\data\bedrock\EntityLegacyIds;
 
 class SlapperEvoker extends SlapperEntity {
 
-    const TYPE_ID = EntityLegacyIds::EVOKER;
+    const TYPE_ID = EntityLegacyIds::EVOCATION_ILLAGER;
     const HEIGHT = 1.95;
 
 }

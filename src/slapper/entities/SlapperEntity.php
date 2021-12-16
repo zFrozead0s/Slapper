@@ -13,6 +13,7 @@ use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\mcpe\protocol\types\entity\EntityIds;
+use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataProperties;
 use pocketmine\network\mcpe\protocol\types\entity\MetadataProperty;
 use pocketmine\player\Player;
 use pocketmine\world\particle\FloatingTextParticle;
@@ -23,7 +24,7 @@ class SlapperEntity extends Entity {
 
 	public static function getNetworkTypeId(): string{
 		//We are using EntityLegacyIds for BC (#blamejojoe)
-		return LegacyEntityIdToStringIdMap::getInstance()->legacyToString(static::TYPE_ID) ?? throw new \InvalidStateException(static::class . ' has invalid Entity ID');
+		return LegacyEntityIdToStringIdMap::getInstance()->legacyToString(static::TYPE_ID) ?? throw new \LogicException(static::class . ' has invalid Entity ID');
 	}
 
     const TYPE_ID = 0;
@@ -42,6 +43,8 @@ class SlapperEntity extends Entity {
 	 */
 	protected array $commands = [];
 
+	protected string $version;
+
     public function __construct(Location $location, ?CompoundTag $nbt = null) {
         $this->particle = new FloatingTextParticle('');
         parent::__construct($location, $nbt);
@@ -56,6 +59,7 @@ class SlapperEntity extends Entity {
 				$this->commands[$stringTag->getValue()] = true;
 			}
 		}
+		$this->version = $nbt->getString('SlapperVersion', '');
 		$this->setImmobile(true);
 		$this->setNameTagVisible(false);
 	}
@@ -69,6 +73,7 @@ class SlapperEntity extends Entity {
 		foreach($this->commands as $command => $bool){
 			$commandsTag->push(new StringTag($command));
 		}
+		$nbt->setString('SlapperVersion', $this->version);
 		return $nbt;
 	}
 
@@ -76,13 +81,13 @@ class SlapperEntity extends Entity {
 		parent::sendSpawnPacket($player);
 
 		$this->particle->setTitle($this->getDisplayName($player));
-        $this->getWorld()->addParticle($this->location->asVector3()->add(0, static::HEIGHT), $this->particle, [$player]);
+        $this->getWorld()->addParticle($this->location->asVector3()->add(0, static::HEIGHT, 0), $this->particle, [$player]);
     }
 
     public function despawnFrom(Player $player, bool $send = true): void {
         parent::despawnFrom($player, $send);
         $this->particle->setInvisible(true);
-        $this->getWorld()->addParticle($this->location->asVector3()->add(0, static::HEIGHT), $this->particle, [$player]);
+        $this->getWorld()->addParticle($this->location->asVector3()->add(0, static::HEIGHT, 0), $this->particle, [$player]);
         $this->particle->setInvisible(false);
     }
 
@@ -123,10 +128,18 @@ class SlapperEntity extends Entity {
 		unset($this->commands[$command]);
 	}
 
+	public function setSlapperVersion(string $version): void{
+		$this->version = $version;
+	}
+
+	public function getSlapperVersion(): string{
+		return $this->version;
+	}
+
 	/** @param Player[] $players */
     private function spawnParticleToPlayers(array $players): void{
 		$world = $this->getWorld();
-        $particlePos = $this->location->asVector3()->add(0, static::HEIGHT);
+        $particlePos = $this->location->asVector3()->add(0, static::HEIGHT, 0);
         foreach($players as $player){
         	$this->particle->setTitle($this->getDisplayName($player));
     	    $world->addParticle($particlePos, $this->particle, [$player]);
@@ -135,7 +148,7 @@ class SlapperEntity extends Entity {
 
 	//For backwards-compatibility
     public function __get(string $name): mixed{
-    	if($variable === 'namedtag'){
+    	if($name === 'namedtag'){
     		return $this->namedTagHack;
     	}
     	throw new \ErrorException("Undefined property: " . get_class($this) . "::\$" . $name);
@@ -143,7 +156,7 @@ class SlapperEntity extends Entity {
     
 	//For backwards-compatibility
     public function __set(string $name, mixed $value): void{
-    	if($variable === 'namedtag'){
+    	if($name === 'namedtag'){
     		if(!$value instanceof CompoundTag){
     			throw new \TypeError('Typed property ' . get_class($this) . "::\$namedtag must be " . CompoundTag::class . ", " . gettype($value) . "used");
     		}

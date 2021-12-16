@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace slapper;
 
 use pocketmine\command\CommandSender;
+use pocketmine\lang\Language;
 use pocketmine\lang\Translatable;
 use pocketmine\permission\DefaultPermissions;
 use pocketmine\permission\PermissibleBase;
@@ -17,9 +18,11 @@ class SlapperCommandSender implements CommandSender{
 	protected $lineHeight = null;
 
 	private Server $server;
+	private Language $language;
 
 	public function __construct(private Main $plugin){
 		$this->server = $plugin->getServer();
+		$this->language = $this->server->getLanguage();
 		$this->perm = new PermissibleBase([DefaultPermissions::ROOT_OPERATOR => true]);
 	}
 
@@ -27,9 +30,13 @@ class SlapperCommandSender implements CommandSender{
 		return $this->server;
 	}
 
+	public function getLanguage() : Language{
+		return $this->language;
+	}
+
 	public function sendMessage(Translatable|string $message) : void{
 		if($message instanceof Translatable){
-			$message = $this->server->getLanguage()->translate($message);
+			$message = $this->language->translate($message);
 		}
 
 		$logger = $this->plugin->getLogger();

@@ -11,7 +11,7 @@ use pocketmine\event\entity\EntityEvent;
 use pocketmine\player\Player;
 
 class SlapperHitEvent extends EntityEvent implements Cancellable {
-	use CancellableTrait;
+    use CancellableTrait;
 
     /** @var Player */
     private $damager;

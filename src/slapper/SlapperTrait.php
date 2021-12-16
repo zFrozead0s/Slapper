@@ -11,7 +11,7 @@ use pocketmine\player\Player;
  */
 trait SlapperTrait {
 
-	protected bool $networkPropertiesDirty = false;
+    protected bool $networkPropertiesDirty = false;
 
     /**
      * @return string
@@ -19,15 +19,15 @@ trait SlapperTrait {
     abstract public function getNameTag(): string;
 
     public function tryChangeMovement(): void {
-		//NOOP
+        //NOOP
     }
 
-	public function prepareMetadata(): void {
+    public function prepareMetadata(): void {
         $this->networkPropertiesDirty = true;
     }
 
     public function sendData(?array $playerList, ?array $data = null): void {
-		//NOOP
+        //NOOP
     }
 
     public function getDisplayName(Player $player): string {

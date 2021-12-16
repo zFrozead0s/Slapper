@@ -14,7 +14,7 @@ class SlapperElderGuardian extends SlapperEntity {
     const HEIGHT = 1.9975;
 
     protected function syncNetworkData(EntityMetadataCollection $properties) : void{
-    	parent::syncNetworkData($properties);
+        parent::syncNetworkData($properties);
         $properties->setGenericFlag(EntityMetadataFlags::ELDER, true);
     }
 }

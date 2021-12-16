@@ -19,11 +19,11 @@ use slapper\SlapperTrait;
 class SlapperHuman extends Human {
     use SlapperTrait;
 
-	protected string $menuName;
+    protected string $menuName;
 
-	public function initEntity(CompoundTag $nbt): void{
-		$this->menuName = $nbt->getString('MenuName', '');
-	}
+    public function initEntity(CompoundTag $nbt): void{
+        $this->menuName = $nbt->getString('MenuName', '');
+    }
 
     public function saveNBT(): CompoundTag {
         $nbt = parent::saveNBT();
@@ -31,36 +31,36 @@ class SlapperHuman extends Human {
         return $nbt;
     }
 
-	public function setMenuName(string $menuName): void{
-		$this->menuName = $menuName;
-	}
+    public function setMenuName(string $menuName): void{
+        $this->menuName = $menuName;
+    }
 
-	public function getNameName(): string{
-		return $this->menuName;
-	}
+    public function getNameName(): string{
+        return $this->menuName;
+    }
 
-	/**
-	 * @param Player[]|null $targets
-	 * @param MetadataProperty[] $data
-	 */
+    /**
+     * @param Player[]|null $targets
+     * @param MetadataProperty[] $data
+     */
     public function sendData(?array $targets, ?array $data = null): void{
-		$targets = $targets ?? $this->hasSpawned;
-		$data = $data ?? $this->getAllNetworkData();
-		if(!isset($data[EntityMetadataProperties::NAMETAG])){
-			parent::sendData($targets, $data);
-			return;
-		}
-		foreach($targets as $p){
-			$data[EntityMetadataProperties::NAMETAG] = new StringMetadataProperty($this->getDisplayName($p));
-			$p->getNetworkSession()->syncActorData($this, $data);
-		}
+        $targets = $targets ?? $this->hasSpawned;
+        $data = $data ?? $this->getAllNetworkData();
+        if(!isset($data[EntityMetadataProperties::NAMETAG])){
+            parent::sendData($targets, $data);
+            return;
+        }
+        foreach($targets as $p){
+            $data[EntityMetadataProperties::NAMETAG] = new StringMetadataProperty($this->getDisplayName($p));
+            $p->getNetworkSession()->syncActorData($this, $data);
+        }
     }
 
     protected function sendSpawnPacket(Player $player): void {
         parent::sendSpawnPacket($player);
 
         if ($this->menuName !== "") {
-        	$player->getNetworkSession()->sendDataPacket(PlayerListPacket::add([PlayerListEntry::createAdditionEntry($this->getUniqueId(), $this->getId(), $this->menuName, SkinAdapterSingleton::get()->toSkinData($this->getSkin()), '')]));
+            $player->getNetworkSession()->sendDataPacket(PlayerListPacket::add([PlayerListEntry::createAdditionEntry($this->getUniqueId(), $this->getId(), $this->menuName, SkinAdapterSingleton::get()->toSkinData($this->getSkin()), '')]));
         }
     }
 }

@@ -20,21 +20,21 @@ class SlapperFallingSand extends SlapperEntity {
     const TYPE_ID = EntityLegacyIds::FALLING_BLOCK;
     const HEIGHT = 0.98;
 
-	protected Block $block;
+    protected Block $block;
 
-	protected function initEntity(CompoundTag $nbt): void{
-		parent::initEntity($nbt);
+    protected function initEntity(CompoundTag $nbt): void{
+        parent::initEntity($nbt);
 
-		$blockFactory = BlockFactory::getInstance();
-		if(($blockIdTag = $nbt->getTag("BlockID")) === null){
-			$this->block = FallingBlock::parseBlockNBT($blockFactory, $nbt);
-		}else{
-			$this->block = $blockFactory->get($blockIdTag->getValue(), 0);
-		}
-	}
+        $blockFactory = BlockFactory::getInstance();
+        if(($blockIdTag = $nbt->getTag("BlockID")) === null){
+            $this->block = FallingBlock::parseBlockNBT($blockFactory, $nbt);
+        }else{
+            $this->block = $blockFactory->get($blockIdTag->getValue(), 0);
+        }
+    }
 
-	protected function syncNetworkData(EntityMetadataCollection $properties) : void{
-    	parent::syncNetworkData($properties);
+    protected function syncNetworkData(EntityMetadataCollection $properties) : void{
+        parent::syncNetworkData($properties);
 
         $properties->setInt(EntityMetadataProperties::VARIANT, RuntimeBlockMapping::getInstance()->toRuntimeId($this->block->getFullId()));
     }
@@ -47,8 +47,8 @@ class SlapperFallingSand extends SlapperEntity {
         return $nbt;
     }
 
-	public function setBlock(Block $block): void{
-		$this->block = $block;
-		$this->networkPropertiesDirty = true;
-	}
+    public function setBlock(Block $block): void{
+        $this->block = $block;
+        $this->networkPropertiesDirty = true;
+    }
 }

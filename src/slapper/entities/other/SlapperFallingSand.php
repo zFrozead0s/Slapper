@@ -36,7 +36,7 @@ class SlapperFallingSand extends SlapperEntity {
 	protected function syncNetworkData(EntityMetadataCollection $properties) : void{
     	parent::syncNetworkData($properties);
 
-        $properties->setInt(EntityMetadataProperties::VARIANT, RuntimeBlockMapping::getInstance()->toRuntimeId($this->block->getFullId());
+        $properties->setInt(EntityMetadataProperties::VARIANT, RuntimeBlockMapping::getInstance()->toRuntimeId($this->block->getFullId()));
     }
 
     public function saveNBT(): CompoundTag {

@@ -518,7 +518,7 @@ class Main extends PluginBase implements Listener {
                                                 case "tileid":
                                                     if (isset($args[2])) {
                                                         if ($entity instanceof SlapperFallingSand) {
-                                                            $data = explode(":", $args[2]);oment
+                                                            $data = explode(":", $args[2]);
                                                             $entity->setBlock(BlockFactory::getInstance()->get((int) ($data[0] ?? 1), (int) ($data[1] ?? 0)));
                                                             $sender->sendMessage($this->prefix . "Block updated.");
                                                         } else {

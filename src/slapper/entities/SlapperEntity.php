@@ -67,7 +67,7 @@ class SlapperEntity extends Entity {
 		$commandsTag = new ListTag([], NBT::TAG_String);
 		$nbt->setTag('Commands', $commandsTag);
 		foreach($this->commands as $command => $bool){
-			$commandsTag->push(new StringTag($command)):
+			$commandsTag->push(new StringTag($command));
 		}
 		return $nbt;
 	}
@@ -104,7 +104,7 @@ class SlapperEntity extends Entity {
 		$this->spawnParticleToPlayers($this->hasSpawned);
     }
 
-	public function getInitialSizeInfo(): EntitySizeInfo{ return new EntitySizeInfo(static::HEIGHT, $this->width);
+	public function getInitialSizeInfo(): EntitySizeInfo{ return new EntitySizeInfo(static::HEIGHT, $this->width); }
 
 	/** @return string[] */
 	public function getCommands(): array{

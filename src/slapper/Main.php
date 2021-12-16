@@ -199,7 +199,7 @@ class Main extends PluginBase implements Listener {
                 /** @var SlapperEntity $entityClass */
                 $entityClass = new $className(EntityDataHelper::parseLocation($world, $nbt), $nbt);
                 return $entityClass;
-            }, [$entityName], $className::TYPE_ID());
+            }, [$entityName], $className::TYPE_ID);
         }
         $entityFactory->register(SlapperHuman::class, static function(World $world, CompoundTag $nbt): SlapperHuman{
             return new SlapperHuman(EntityDataHelper::parseLocation($world, $nbt), Human::parseSkinNBT($nbt), $nbt);

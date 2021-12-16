@@ -9,21 +9,25 @@ use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\command\ConsoleCommandSender;
 use pocketmine\entity\Entity;
+use pocketmine\entity\EntityDataHelper;
 use pocketmine\entity\EntityFactory;
+use pocketmine\entity\Human;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntitySpawnEvent;
 use pocketmine\event\entity\EntityMotionEvent;
 use pocketmine\event\Listener;
-use pocketmine\item\Item;
+use pocketmine\item\LegacyStringToItemParser;
+use pocketmine\item\LegacyStringToItemParserException;
+use pocketmine\item\StringToItemParser;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\DoubleTag;
-use pocketmine\nbt\tag\FloatTag;
-use pocketmine\nbt\tag\ListTag;
-use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
+use pocketmine\utils\AssumptionFailedError;
 use pocketmine\utils\TextFormat;
+use pocketmine\utils\Utils;
+use pocketmine\world\Location;
+use pocketmine\world\World;
 use slapper\entities\other\SlapperBoat;
 use slapper\entities\other\SlapperFallingSand;
 use slapper\entities\other\SlapperMinecart;
@@ -44,7 +48,8 @@ use slapper\entities\SlapperGhast;
 use slapper\entities\SlapperGuardian;
 use slapper\entities\SlapperHorse;
 use slapper\entities\SlapperHuman;
-use slapper\entities\SlapperSlapperIronGolemHusk;
+use slapper\entities\SlapperIronGolem;
+use slapper\entities\SlapperHusk;
 use slapper\entities\SlapperLavaSlime;
 use slapper\entities\SlapperLlama;
 use slapper\entities\SlapperMule;
@@ -153,36 +158,52 @@ class Main extends PluginBase implements Listener {
         "menuname: /slapper edit <eid> menuname <name/remove>"
     ];
 
+	private SlapperCommandSender $commandSender;
+
     /**
      * @return void
      */
     public function onEnable(): void {
+    	$this->commandSender = new SlapperCommandSender($this);
 		$this->getServer()->getPluginManager()->registerEvents($this, $this);
 		$this->registerEntities();
+	}
+	public function registerEntities(): void {
+		$entityFactory = EntityFactory::getInstance();
+		/** @var class-string<SlapperEntity> $className */
+		foreach ([
+			 SlapperCreeper::class, SlapperBat::class, SlapperSheep::class,
+			 SlapperPigZombie::class, SlapperGhast::class, SlapperBlaze::class,
+			 SlapperIronGolem::class, SlapperSnowman::class, SlapperOcelot::class,
+			 SlapperZombieVillager::class, SlapperCow::class,
+			 SlapperZombie::class, SlapperSquid::class, SlapperVillager::class,
+			 SlapperSpider::class, SlapperPig::class, SlapperMushroomCow::class,
+			 SlapperWolf::class, SlapperLavaSlime::class, SlapperSilverfish::class,
+			 SlapperSkeleton::class, SlapperSlime::class, SlapperChicken::class,
+			 SlapperEnderman::class, SlapperCaveSpider::class, SlapperBoat::class,
+			 SlapperMinecart::class, SlapperMule::class, SlapperWitch::class,
+			 SlapperPrimedTNT::class, SlapperHorse::class, SlapperDonkey::class,
+			 SlapperSkeletonHorse::class, SlapperZombieHorse::class, SlapperRabbit::class,
+			 SlapperStray::class, SlapperHusk::class, SlapperWitherSkeleton::class,
+			 SlapperFallingSand::class, SlapperElderGuardian::class, SlapperEndermite::class,
+			 SlapperEvoker::class, SlapperGuardian::class, SlapperLlama::class,
+			 SlapperPolarBear::class, SlapperShulker::class, SlapperVex::class,
+			 SlapperVindicator::class, SlapperWither::class
+		] as $className){
+			$stringPos = strpos($className, 'Slapper');
+			if($stringPos === false){
+				throw new AssumptionFailedError("$className should always contain the word 'Slapper'");
 			}
-
-			public function registerEntities()
-			{
-				foreach ([
-							 SlapperCreeper::class, SlapperBat::class, SlapperSheep::class,
-							 SlapperPigZombie::class, SlapperGhast::class, SlapperBlaze::class,
-							 SlapperIronGolem::class, SlapperSnowman::class, SlapperOcelot::class,
-							 SlapperZombieVillager::class, SlapperHuman::class, SlapperCow::class,
-							 SlapperZombie::class, SlapperSquid::class, SlapperVillager::class,
-							 SlapperSpider::class, SlapperPig::class, SlapperMushroomCow::class,
-							 SlapperWolf::class, SlapperLavaSlime::class, SlapperSilverfish::class,
-							 SlapperSkeleton::class, SlapperSlime::class, SlapperChicken::class,
-							 SlapperEnderman::class, SlapperCaveSpider::class, SlapperBoat::class,
-							 SlapperMinecart::class, SlapperMule::class, SlapperWitch::class,
-							 SlapperPrimedTNT::class, SlapperHorse::class, SlapperDonkey::class,
-							 SlapperSkeletonHorse::class, SlapperZombieHorse::class, SlapperRabbit::class,
-							 SlapperStray::class, SlapperHusk::class, SlapperWitherSkeleton::class,
-							 SlapperFallingSand::class, SlapperElderGuardian::class, SlapperEndermite::class,
-							 SlapperEvoker::class, SlapperGuardian::class, SlapperLlama::class,
-							 SlapperPolarBear::class, SlapperShulker::class, SlapperVex::class,
-							 SlapperVindicator::class, SlapperWither::class
-						 ] as $className);
-					}
+			$entityName = substr($className, $stringPos);
+			$entityFactory->register($className, function(World $world, CompoundTag $nbt) use($className): SlapperEntity{
+				/** @var SlapperEntity $entityClass */
+				$entityClass = new $className(EntityDataHelper::parseLocation($world, $nbt), $this, $nbt);
+			}, [$entityName], $className::getNetworkTypeId());
+		}
+		$entityFactory->register(SlapperHuman::class, static function(World $world, CompoundTag $nbt): SlapperHuman{
+			return new SlapperHuman(EntityDataHelper::parseLocation($world, $nbt), Human::parseSkinNBT($nbt), $nbt);
+		}, ['Human']);
+	}
 
 
 
@@ -204,7 +225,7 @@ class Main extends PluginBase implements Listener {
                     $sender->sendMessage($this->prefix . "Please enter a player and a command.");
                     return true;
                 }
-                $player = $this->getServer()->getPlayer(array_shift($args));
+                $player = $this->getServer()->getPlayerByPrefix(array_shift($args));
                 if ($player instanceof Player) {
                     $this->getServer()->dispatchCommand($player, trim(implode(" ", $args)));
                     return true;
@@ -258,10 +279,10 @@ class Main extends PluginBase implements Listener {
                                 $sender->sendMessage($this->prefix . "Hit an entity to remove it.");
                                 return true;
                             }
-                            $entity = $sender->getLevel()->getEntity((int) $args[0]);
+                            $entity = $sender->getWorld()->getEntity((int) $args[0]);
                             if ($entity !== null) {
                                 if ($entity instanceof SlapperEntity || $entity instanceof SlapperHuman) {
-                                    $this->getServer()->getPluginManager()->callEvent(new SlapperDeletionEvent($entity));
+                                    (new SlapperDeletionEvent($entity))->call();
                                     $entity->close();
                                     $sender->sendMessage($this->prefix . "Entity removed.");
                                 } else {
@@ -277,8 +298,8 @@ class Main extends PluginBase implements Listener {
                                 return true;
                             }
                             if (isset($args[0])) {
-                                $level = $sender->getLevel();
-                                $entity = $level->getEntity((int) $args[0]);
+                                $world = $sender->getWorld();
+                                $entity = $world->getEntity((int) $args[0]);
                                 if ($entity !== null) {
                                     if ($entity instanceof SlapperEntity || $entity instanceof SlapperHuman) {
                                         if (isset($args[1])) {
@@ -290,7 +311,13 @@ class Main extends PluginBase implements Listener {
                                                 case "cap":
                                                     if ($entity instanceof SlapperHuman) {
                                                         if (isset($args[2])) {
-                                                            $entity->getArmorInventory()->setHelmet(Item::fromString($args[2]));
+                                                        	try{
+                                                        		$item = StringToItemParser::getInstance()->parse($args[2]) ?? LegacyStringToItemParser::getInstance()->parse($args[2]);
+                                                        	}catch(LegacyStringToItemParserException){
+                                                        		$sender->sendMessage($this->prefix . "There is no such item with name $args[2]");
+                                                        		return true;
+                                                        	}
+                                                            $entity->getArmorInventory()->setHelmet($item);
                                                             $sender->sendMessage($this->prefix . "Helmet updated.");
                                                         } else {
                                                             $sender->sendMessage($this->prefix . "Please enter an item ID.");
@@ -304,7 +331,13 @@ class Main extends PluginBase implements Listener {
                                                 case "chestplate":
                                                     if ($entity instanceof SlapperHuman) {
                                                         if (isset($args[2])) {
-                                                            $entity->getArmorInventory()->setChestplate(Item::fromString($args[2]));
+															try{
+                                                        		$item = StringToItemParser::getInstance()->parse($args[2]) ?? LegacyStringToItemParser::getInstance()->parse($args[2]);
+                                                        	}catch(LegacyStringToItemParserException){
+                                                        		$sender->sendMessage($this->prefix . "There is no such item with name $args[2]");
+                                                        		return true;
+                                                        	}
+                                                            $entity->getArmorInventory()->setChestplate($item);
                                                             $sender->sendMessage($this->prefix . "Chestplate updated.");
                                                         } else {
                                                             $sender->sendMessage($this->prefix . "Please enter an item ID.");
@@ -318,7 +351,13 @@ class Main extends PluginBase implements Listener {
                                                 case "leggings":
                                                     if ($entity instanceof SlapperHuman) {
                                                         if (isset($args[2])) {
-                                                            $entity->getArmorInventory()->setLeggings(Item::fromString($args[2]));
+															try{
+                                                        		$item = StringToItemParser::getInstance()->parse($args[2]) ?? LegacyStringToItemParser::getInstance()->parse($args[2]);
+                                                        	}catch(LegacyStringToItemParserException){
+                                                        		$sender->sendMessage($this->prefix . "There is no such item with name $args[2]");
+                                                        		return true;
+                                                        	}
+                                                            $entity->getArmorInventory()->setLeggings($item);
                                                             $sender->sendMessage($this->prefix . "Leggings updated.");
                                                         } else {
                                                             $sender->sendMessage($this->prefix . "Please enter an item ID.");
@@ -332,7 +371,13 @@ class Main extends PluginBase implements Listener {
                                                 case "shoes":
                                                     if ($entity instanceof SlapperHuman) {
                                                         if (isset($args[2])) {
-                                                            $entity->getArmorInventory()->setBoots(Item::fromString($args[2]));
+															try{
+                                                        		$item = StringToItemParser::getInstance()->parse($args[2]) ?? LegacyStringToItemParser::getInstance()->parse($args[2]);
+                                                        	}catch(LegacyStringToItemParserException){
+                                                        		$sender->sendMessage($this->prefix . "There is no such item with name $args[2]");
+                                                        		return true;
+                                                        	}
+                                                            $entity->getArmorInventory()->setBoots($item);
                                                             $sender->sendMessage($this->prefix . "Boots updated.");
                                                         } else {
                                                             $sender->sendMessage($this->prefix . "Please enter an item ID.");
@@ -348,8 +393,13 @@ class Main extends PluginBase implements Listener {
                                                 case "held":
                                                     if ($entity instanceof SlapperHuman) {
                                                         if (isset($args[2])) {
-                                                            $entity->getInventory()->setItemInHand(Item::fromString($args[2]));
-                                                            $entity->getInventory()->sendHeldItem($entity->getViewers());
+															try{
+                                                        		$item = StringToItemParser::getInstance()->parse($args[2]) ?? LegacyStringToItemParser::getInstance()->parse($args[2]);
+                                                        	}catch(LegacyStringToItemParserException){
+                                                        		$sender->sendMessage($this->prefix . "There is no such item with name $args[2]");
+                                                        		return true;
+                                                        	}
+                                                            $entity->getInventory()->setItemInHand($item);
                                                             $sender->sendMessage($this->prefix . "Item updated.");
                                                         } else {
                                                             $sender->sendMessage($this->prefix . "Please enter an item ID.");
@@ -400,9 +450,9 @@ class Main extends PluginBase implements Listener {
                                                                     $type = 1;
                                                             }
                                                             if ($type === 0) {
-                                                                $entity->namedtag->setString("MenuName", $input);
+                                                                $entity->setMenuName($input);
                                                             } else {
-                                                                $entity->namedtag->setString("MenuName", "");
+                                                                $entity->setMenuName("");
                                                             }
                                                             $entity->respawnToAll();
                                                             $sender->sendMessage($this->prefix . "Menu name updated.");
@@ -422,14 +472,11 @@ class Main extends PluginBase implements Listener {
                                                         array_shift($args);
                                                         $input = trim(implode(" ", $args));
 
-                                                        $commands = $entity->namedtag->getCompoundTag("Commands") ?? new CompoundTag("Commands");
-
-                                                        if ($commands->hasTag($input)) {
+                                                        if ($entity->hasCommand($input)) {
                                                             $sender->sendMessage($this->prefix . "That command has already been added.");
                                                             return true;
                                                         }
-                                                        $commands->setString($input, $input);
-                                                        $entity->namedtag->setTag($commands); //in case a new CompoundTag was created
+                                                        $entity->addCommand($input);
                                                         $sender->sendMessage($this->prefix . "Command added.");
                                                     } else {
                                                         $sender->sendMessage($this->prefix . "Please enter a command.");
@@ -444,10 +491,7 @@ class Main extends PluginBase implements Listener {
                                                         array_shift($args);
                                                         $input = trim(implode(" ", $args));
 
-                                                        $commands = $entity->namedtag->getCompoundTag("Commands") ?? new CompoundTag("Commands");
-
-                                                        $commands->removeTag($input);
-                                                        $entity->namedtag->setTag($commands); //in case a new CompoundTag was created
+                                                        $entity->removeCommand($input);
                                                         $sender->sendMessage($this->prefix . "Command removed.");
                                                     } else {
                                                         $sender->sendMessage($this->prefix . "Please enter a command.");
@@ -456,14 +500,13 @@ class Main extends PluginBase implements Listener {
                                                 case "listcommands":
                                                 case "listcmds":
                                                 case "listcs":
-                                                    $commands = $entity->namedtag->getCompoundTag("Commands");
-                                                    if ($commands !== null and $commands->getCount() > 0) {
+                                                    $commands = $entity->getCommands();
+                                                    if (count($commands) > 0) {
                                                         $id = 0;
 
-                                                        /** @var StringTag $stringTag */
-                                                        foreach ($commands as $stringTag) {
+                                                        foreach ($commands as $command) {
                                                             $id++;
-                                                            $sender->sendMessage(TextFormat::GREEN . "[" . TextFormat::YELLOW . "S" . TextFormat::GREEN . "] " . TextFormat::YELLOW . $id . ". " . TextFormat::GREEN . $stringTag->getValue() . "\n");
+                                                            $sender->sendMessage(TextFormat::GREEN . "[" . TextFormat::YELLOW . "S" . TextFormat::GREEN . "] " . TextFormat::YELLOW . $id . ". " . TextFormat::GREEN . $command . "\n");
                                                         }
                                                     } else {
                                                         $sender->sendMessage($this->prefix . "That entity does not have any commands.");
@@ -475,10 +518,8 @@ class Main extends PluginBase implements Listener {
                                                 case "tileid":
                                                     if (isset($args[2])) {
                                                         if ($entity instanceof SlapperFallingSand) {
-                                                            $data = explode(":", $args[2]);
-                                                            //haxx: we shouldn't use toStaticRuntimeId() because it's internal, but there isn't really any better option at the moment
-                                                            $entity->getDataPropertyManager()->setInt(Entity::DATA_VARIANT, BlockFactory::toStaticRuntimeId((int) ($data[0] ?? 1), (int) ($data[1] ?? 0)));
-                                                            $entity->sendData($entity->getViewers());
+                                                            $data = explode(":", $args[2]);oment
+                                                            $entity->setBlock(BlockFactory::getInstance()->get((int) ($data[0] ?? 1), (int) ($data[1] ?? 0)));
                                                             $sender->sendMessage($this->prefix . "Block updated.");
                                                         } else {
                                                             $sender->sendMessage($this->prefix . "That entity is not a block.");
@@ -491,7 +532,7 @@ class Main extends PluginBase implements Listener {
                                                 case "tphere":
                                                 case "movehere":
                                                 case "bringhere":
-                                                    $entity->teleport($sender);
+                                                    $entity->teleport($sender->getLocation());
                                                     $sender->sendMessage($this->prefix . "Teleported entity to you.");
                                                     $entity->respawnToAll();
                                                     return true;
@@ -500,15 +541,14 @@ class Main extends PluginBase implements Listener {
                                                 case "goto":
                                                 case "teleport":
                                                 case "tp":
-                                                    $sender->teleport($entity);
+                                                    $sender->teleport($entity->getLocation());
                                                     $sender->sendMessage($this->prefix . "Teleported you to entity.");
                                                     return true;
                                                 case "scale":
                                                 case "size":
                                                     if (isset($args[2])) {
                                                         $scale = (float) $args[2];
-                                                        $entity->getDataPropertyManager()->setFloat(Entity::DATA_SCALE, $scale);
-                                                        $entity->sendData($entity->getViewers());
+                                                        $entity->setScale($scale);
                                                         $sender->sendMessage($this->prefix . "Updated scale.");
                                                     } else {
                                                         $sender->sendMessage($this->prefix . "Please enter a value.");
@@ -580,12 +620,19 @@ class Main extends PluginBase implements Listener {
                                 $sender->sendMessage($this->prefix . "Invalid entity type.");
                                 return true;
                             }
-                            $nbt = $this->makeNBT($chosenType, $sender, $name);
-                            $slapperClass = "Slapper$chosenType";
-                            assert(is_a($slapperClass, SlapperEntity::class, true));
+
+                            $slapperClass = __NAMESPACE__ . "entities\\Slapper$chosenType";
+                            Utils::testValidInstance($slapperClass, SlapperEntity::class);
                             /** @var SlapperEntity $entity */
-                            $entity = new $slapperClass($sender->getLocation(), $nbt, $this);
-                            $this->getServer()->getPluginManager()->callEvent(new SlapperCreationEvent($entity, $slapperClass, $sender, SlapperCreationEvent::CAUSE_COMMAND));
+                            $entity = is_a($slapperClass, SlapperHuman::class, true) ?
+                            	new $slapperClass($sender->getLocation(), $this, $sender->getSkin()) :
+                            	new $slapperClass($sender->getLocation(), $this);
+                            $entity->setNameTag($name);
+                            $entity->setSlapperVersion($this->getDescription()->getVersion());
+                            if($entity instanceof SlapperHuman){
+                            	$entity->getInventory()->setContents($sender->getInventory()->getContents());
+                            }
+                            (new SlapperCreationEvent($entity, $slapperClass, $sender, SlapperCreationEvent::CAUSE_COMMAND))->call();
                             $entity->spawnToAll();
                             $sender->sendMessage($this->prefix . $chosenType . " entity spawned with name " . TextFormat::WHITE . "\"" . TextFormat::BLUE . $name . TextFormat::WHITE . "\"" . TextFormat::GREEN . " and entity ID " . TextFormat::BLUE . $entity->getId());
                             return true;
@@ -601,45 +648,15 @@ class Main extends PluginBase implements Listener {
         return true;
     }
 
-	/**
-	 * @param string $type
-	 * @param Player $player
-	 * @param string $name
-	 *
-	 * @return CompoundTag
-	 */
-	private function makeNBT(string $type, Player $player, ?string $name = null): CompoundTag {
-		$nbt = CompoundTag::create()
-			->setShort("Health", 1)
-			->setString(CompoundTag::create("Commands", []))
-			->setString("MenuName", "")
-			->setString("CustomName", $name)
-			->setString("SlapperVersion", $this->getDescription()->getVersion());
-		if ($type === "Human") {
-			$playerNBT = $player->saveNBT();
-
-			$inventoryTag = $playerNBT->getListTag("Inventory");
-			assert($inventoryTag !== null);
-			$nbt->setTag(clone $inventoryTag);
-
-			$skinTag = $playerNBT->getCompoundTag("Skin");
-			assert($skinTag !== null);
-			$nbt->setTag(clone $skinTag);
-		}
-		return $nbt;
-	}
-
     /**
      * @param EntityDamageEvent $event
-     *
-     * @ignoreCancelled true
      *
      * @return void
      */
     public function onEntityDamage(EntityDamageEvent $event): void {
         $entity = $event->getEntity();
         if ($entity instanceof SlapperEntity || $entity instanceof SlapperHuman) {
-            $event->setCancelled(true);
+            $event->cancel();
             if (!$event instanceof EntityDamageByEntityEvent) {
                 return;
             }
@@ -647,8 +664,9 @@ class Main extends PluginBase implements Listener {
             if (!$damager instanceof Player) {
                 return;
             }
-            $this->getServer()->getPluginManager()->callEvent($event = new SlapperHitEvent($entity, $damager));
-            if ($event->isCancelled()) {
+            $hitEvent = new SlapperHitEvent($entity, $damager);
+            $hitEvent->call();
+            if ($hitEvent->isCancelled()) {
                 return;
             }
             $damagerName = $damager->getName();
@@ -667,11 +685,10 @@ class Main extends PluginBase implements Listener {
                 return;
             }
 
-            if (($commands = $entity->namedtag->getCompoundTag("Commands")) !== null) {
+            if (($commands = $entity->getCommands()) > 0) {
                 $server = $this->getServer();
-                /** @var StringTag $stringTag */
-                foreach ($commands as $stringTag) {
-                    $server->dispatchCommand(new ConsoleCommandSender(), str_replace("{player}", '"' . $damagerName . '"', $stringTag->getValue()));
+                foreach ($commands as $command) {
+                    $server->dispatchCommand($this->commandSender, str_replace("{player}", '"' . $damagerName . '"', $stringTag->getValue()));
                 }
             }
         }
@@ -685,10 +702,11 @@ class Main extends PluginBase implements Listener {
     public function onEntitySpawn(EntitySpawnEvent $ev): void {
         $entity = $ev->getEntity();
         if ($entity instanceof SlapperEntity || $entity instanceof SlapperHuman) {
-            $clearLagg = $this->getServer()->getPluginManager()->getPlugin("ClearLagg");
+        	//Plugin not available in poggit
+            /*$clearLagg = $this->getServer()->getPluginManager()->getPlugin("ClearLagg");
             if ($clearLagg !== null) {
                 $clearLagg->exemptEntity($entity);
-            }
+            }*/
         }
     }
 
@@ -700,13 +718,7 @@ class Main extends PluginBase implements Listener {
     public function onEntityMotion(EntityMotionEvent $event): void {
         $entity = $event->getEntity();
         if ($entity instanceof SlapperEntity || $entity instanceof SlapperHuman) {
-            $event->setCancelled(true);
+            $event->cancel();
         }
     }
-
-	public static function getInstance(): Main
-	{
-		return self::$instance;
-	}
-
 }

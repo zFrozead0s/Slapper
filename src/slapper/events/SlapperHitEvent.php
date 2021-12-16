@@ -6,10 +6,12 @@ namespace slapper\events;
 
 use pocketmine\entity\Entity;
 use pocketmine\event\Cancellable;
+use pocketmine\event\CancellableTrait;
 use pocketmine\event\entity\EntityEvent;
-use pocketmine\Player;
+use pocketmine\player\Player;
 
 class SlapperHitEvent extends EntityEvent implements Cancellable {
+	use CancellableTrait;
 
     /** @var Player */
     private $damager;
@@ -19,9 +21,6 @@ class SlapperHitEvent extends EntityEvent implements Cancellable {
         $this->damager = $damager;
     }
 
-    /**
-     * @return Player
-     */
     public function getDamager(): Player {
         return $this->damager;
     }

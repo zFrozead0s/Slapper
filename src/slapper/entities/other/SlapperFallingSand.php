@@ -22,7 +22,7 @@ class SlapperFallingSand extends SlapperEntity {
 
     protected Block $block;
 
-    protected function initEntity(CompoundTag $nbt): void{
+    public function initEntity(CompoundTag $nbt): void{
         parent::initEntity($nbt);
 
         $blockFactory = BlockFactory::getInstance();

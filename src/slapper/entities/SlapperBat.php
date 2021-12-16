@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace slapper\entities;
 
+use pocketmine\data\bedrock\EntityLegacyIds;
+
 class SlapperBat extends SlapperEntity {
 
-    const TYPE_ID = 19;
+    const TYPE_ID = EntityLegacyIds::BAT;
     const HEIGHT = 0.9;
 
 }

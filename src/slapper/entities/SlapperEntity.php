@@ -4,98 +4,169 @@ declare(strict_types=1);
 
 namespace slapper\entities;
 
+use pocketmine\data\bedrock\LegacyEntityIdToStringIdMap;
 use pocketmine\entity\Entity;
-use pocketmine\item\ItemFactory;
-use pocketmine\item\ItemIds;
-use pocketmine\world\Location;
-use pocketmine\world\World;
+use pocketmine\entity\EntitySizeInfo;
+use pocketmine\entity\Location;
+use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\network\mcpe\protocol\types\inventory\ItemStackWrapper;
-use pocketmine\item\Item;
-use pocketmine\network\mcpe\protocol\AddActorPacket as AddEntityPacket;
-use pocketmine\network\mcpe\protocol\AddPlayerPacket;
-use pocketmine\network\mcpe\protocol\MoveActorAbsolutePacket as MoveEntityAbsolutePacket;
-use pocketmine\network\mcpe\protocol\RemoveActorPacket as RemoveEntityPacket;
-use pocketmine\network\mcpe\protocol\SetActorDataPacket as SetEntityDataPacket;
+use pocketmine\nbt\tag\ListTag;
+use pocketmine\nbt\tag\StringTag;
+use pocketmine\network\mcpe\protocol\types\entity\EntityIds;
+use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataProperties;
+use pocketmine\network\mcpe\protocol\types\entity\MetadataProperty;
 use pocketmine\player\Player;
-use pocketmine\utils\UUID;
+use pocketmine\world\particle\FloatingTextParticle;
 use slapper\SlapperTrait;
-use slapper\Slapper;
-use pocketmine\plugin\Plugin;
 
 class SlapperEntity extends Entity {
     use SlapperTrait;
 
+    public static function getNetworkTypeId(): string{
+        //We are using EntityLegacyIds for BC (#blamejojoe)
+        return LegacyEntityIdToStringIdMap::getInstance()->legacyToString(static::TYPE_ID) ?? throw new \LogicException(static::class . ' has invalid Entity ID');
+    }
+
     const TYPE_ID = 0;
     const HEIGHT = 0;
 
-    /** @var int */
-    private $tagId;
+    /** @var float */
+    public $width = 1; //BC and polyfill
 
-    public function __construct(Location $location, CompoundTag $nbt, Main $plugin) {
-        $this->height = static::HEIGHT;
-        $this->width = $this->width ?? 1; //polyfill
-        $this->tagId = Entity::$entityCount++;
+    private CompoundTag $namedTagHack;
+
+    private FloatingTextParticle $particle;
+
+    /**
+     * @var true[]
+     * @phpstan-var array<string, true>
+     */
+    protected array $commands = [];
+
+    protected string $version;
+
+    public function __construct(Location $location, ?CompoundTag $nbt = null) {
+        $this->particle = new FloatingTextParticle('');
         parent::__construct($location, $nbt);
-        $this->prepareMetadata();
-        $this->setNameTagVisible(false);
-		$this->plugin = $plugin;
     }
 
-    public function saveNBT(): void {
-        parent::saveNBT();
-        $this->saveSlapperNbt();
+    public function initEntity(CompoundTag $nbt): void {
+        parent::initEntity($nbt);
+        $this->namedTagHack = $nbt;
+        if(($commandsTag = $nbt->getTag('Commands')) instanceof ListTag or $commandsTag instanceof CompoundTag){
+            /** @var StringTag $stringTag */
+            foreach($commandsTag as $stringTag){
+                $this->commands[$stringTag->getValue()] = true;
+            }
+        }
+        $this->version = $nbt->getString('SlapperVersion', '');
+        $this->setImmobile(true);
+        $this->setNameTagVisible(false);
+    }
+
+    //For backwards-compatibility
+    public function saveNBT(): CompoundTag{
+        $nbt = parent::saveNBT();
+        $nbt = $nbt->merge($this->namedTagHack);
+        $commandsTag = new ListTag([], NBT::TAG_String);
+        $nbt->setTag('Commands', $commandsTag);
+        foreach($this->commands as $command => $bool){
+            $commandsTag->push(new StringTag($command));
+        }
+        $nbt->setString('SlapperVersion', $this->version);
+        return $nbt;
     }
 
     protected function sendSpawnPacket(Player $player): void {
-        $pk = new AddEntityPacket();
-        $pk->entityRuntimeId = $this->getId();
-        $pk->type = AddEntityPacket::LEGACY_ID_MAP_BC[static::TYPE_ID];
-        $pk->position = $this->asVector3();
-        $pk->yaw = $pk->headYaw = $this->yaw;
-        $pk->pitch = $this->pitch;
-        $pk->metadata = $this->getDataPropertyManager()->getAll();
-        unset($pk->metadata[self::DATA_NAMETAG]);
+        parent::sendSpawnPacket($player);
 
-        $player->dataPacket($pk);
-
-        $pk2 = new AddPlayerPacket();
-        $pk2->entityRuntimeId = $this->tagId;
-        $pk2->uuid = UUID::fromRandom();
-        $pk2->username = $this->getDisplayName($player);
-        $pk2->position = $this->asVector3()->add(0, static::HEIGHT);
-		$pk2->item = ItemStackWrapper::legacy(Item::get(ItemIds::AIR));
-        $pk2->metadata = [self::DATA_SCALE => [self::DATA_TYPE_FLOAT, 0.0]];
-
-        $player->dataPacket($pk2);
-    }
-
-    public function sendNameTag(Player $player): void {
-        $pk = new SetEntityDataPacket();
-        $pk->entityRuntimeId = $this->tagId;
-        $pk->metadata = [self::DATA_NAMETAG => [self::DATA_TYPE_STRING, $this->getDisplayName($player)]];
-        $player->dataPacket($pk);
+        $this->particle->setTitle($this->getDisplayName($player));
+        $this->getWorld()->addParticle($this->location->asVector3()->add(0, static::HEIGHT, 0), $this->particle, [$player]);
     }
 
     public function despawnFrom(Player $player, bool $send = true): void {
         parent::despawnFrom($player, $send);
-        $pk = new RemoveEntityPacket();
-        $pk->entityUniqueId = $this->tagId;
-        $player->dataPacket($pk);
+        $this->particle->setInvisible(true);
+        $this->getWorld()->addParticle($this->location->asVector3()->add(0, static::HEIGHT, 0), $this->particle, [$player]);
+        $this->particle->setInvisible(false);
     }
 
-
-
-    public function broadcastMovement(bool $teleport = false): void {
-        if($this->chunk !== null) {
-            parent::broadcastMovement($teleport);
-            $pk = new MoveEntityAbsolutePacket();
-            $pk->entityRuntimeId = $this->tagId;
-            $pk->position = $this->asVector3()->add(0, static::HEIGHT + 1.62);
-            $pk->xRot = $pk->yRot = $pk->zRot = 0;
-
-            $this->level->addChunkPacket($this->chunk->getX(), $this->chunk->getZ(), $pk);
+    /**
+     * @param Player[]|null $targets
+     * @param MetadataProperty[] $data
+     */
+    public function sendData(?array $targets, ?array $data = null): void{
+        $targets ??= $this->hasSpawned;
+        $data ??= $this->getAllNetworkData();
+        parent::sendData($targets, $data);
+        if(isset($data[EntityMetadataProperties::NAMETAG])){
+            $this->spawnParticleToPlayers($targets);
         }
     }
 
+    public function broadcastMovement(bool $teleport = false): void {
+        parent::broadcastMovement($teleport);
+        $this->spawnParticleToPlayers($this->hasSpawned);
+    }
+
+    public function getInitialSizeInfo(): EntitySizeInfo{ return new EntitySizeInfo(static::HEIGHT, $this->width); }
+
+    /** @return string[] */
+    public function getCommands(): array{
+        return array_keys($this->commands);
+    }
+
+    public function addCommand(string $command): void{
+        $this->commands[$command] = true;
+    }
+
+    public function hasCommand(string $command): bool{
+        return isset($this->commands[$command]);
+    }
+
+    public function removeCommand(string $command): void{
+        unset($this->commands[$command]);
+    }
+
+    public function setSlapperVersion(string $version): void{
+        $this->version = $version;
+    }
+
+    public function getSlapperVersion(): string{
+        return $this->version;
+    }
+
+    /** @param Player[] $players */
+    private function spawnParticleToPlayers(array $players): void{
+        $world = $this->getWorld();
+        $particlePos = $this->location->asVector3()->add(0, static::HEIGHT, 0);
+        foreach($players as $player){
+            $this->particle->setTitle($this->getDisplayName($player));
+            $world->addParticle($particlePos, $this->particle, [$player]);
+        }
+    }
+
+    //For backwards-compatibility
+    public function __get(string $name): mixed{
+        if($name === 'namedtag'){
+            return $this->namedTagHack;
+        }
+        throw new \ErrorException("Undefined property: " . get_class($this) . "::\$" . $name);
+    }
+    
+    //For backwards-compatibility
+    public function __set(string $name, mixed $value): void{
+        if($name === 'namedtag'){
+            if(!$value instanceof CompoundTag){
+                throw new \TypeError('Typed property ' . get_class($this) . "::\$namedtag must be " . CompoundTag::class . ", " . gettype($value) . "used");
+            }
+            $this->namedTagHack = $value;
+        }
+        throw new \ErrorException("Undefined property: " . get_class($this) . "::\$" . $name);
+    }
+
+    //For backwards-compatibility
+    public function __isset(string $name): bool{
+        return $name === 'namedtag';
+    }
 }

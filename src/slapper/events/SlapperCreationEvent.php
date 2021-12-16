@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 namespace slapper\events;
 
-use pocketmine\event\entity\EntityEvent;
-use pocketmine\Player;
 use pocketmine\entity\Entity;
+use pocketmine\event\entity\EntityEvent;
+use pocketmine\player\Player;
 
 class SlapperCreationEvent extends EntityEvent {
 
     const CAUSE_COMMAND = 0;
 
-    /** @var Entity */
-    protected $entity;
     /** @var string */
     private $type;
     /** @var Player|null */

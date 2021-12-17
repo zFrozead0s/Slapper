@@ -6,6 +6,7 @@ namespace slapper\entities;
 
 use pocketmine\data\bedrock\LegacyEntityIdToStringIdMap;
 use pocketmine\entity\Entity;
+use pocketmine\entity\Human;
 use pocketmine\entity\EntitySizeInfo;
 use pocketmine\entity\Location;
 use pocketmine\nbt\NBT;
@@ -18,9 +19,10 @@ use pocketmine\network\mcpe\protocol\types\entity\MetadataProperty;
 use pocketmine\player\Player;
 use pocketmine\world\particle\FloatingTextParticle;
 use slapper\SlapperTrait;
+use slapper\SlapperInterface;
 
-class SlapperEntity extends Entity {
-    use SlapperTrait;
+class SlapperEntity extends Human implements SlapperInterface{
+	use SlapperTrait;
 
     public static function getNetworkTypeId(): string{
         //We are using EntityLegacyIds for BC (#blamejojoe)

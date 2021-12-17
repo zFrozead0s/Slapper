@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace slapper\entities;
 
 use pocketmine\entity\Human;
+use pocketmine\entity\Entity;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\convert\SkinAdapterSingleton;
 use pocketmine\network\mcpe\protocol\PlayerListPacket;
@@ -15,9 +16,11 @@ use pocketmine\network\mcpe\protocol\types\entity\StringMetadataProperty;
 use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
 use pocketmine\player\Player;
 use slapper\SlapperTrait;
+use slapper\SlapperInterface;
 
-class SlapperHuman extends Human {
-    use SlapperTrait;
+
+class SlapperHuman extends Human implements SlapperInterface{
+	use SlapperTrait;
 
     protected string $menuName;
 
@@ -38,6 +41,11 @@ class SlapperHuman extends Human {
     public function getNameName(): string{
         return $this->menuName;
     }
+
+
+	public function setSlapperVersion(string $version): void{
+		$this->version = $version;
+	}
 
     /**
      * @param Player[]|null $targets

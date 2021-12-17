@@ -207,8 +207,6 @@ class Main extends PluginBase implements Listener {
     }
 
 
-
-
     /**
      * @param CommandSender $sender
      * @param Command       $command
@@ -623,7 +621,7 @@ class Main extends PluginBase implements Listener {
                             }
 
                             $slapperClass = __NAMESPACE__ . "\\entities\\Slapper$chosenType";
-                            Utils::testValidInstance($slapperClass, SlapperEntity::class);
+						Utils::testValidInstance($slapperClass, SlapperInterface::class);
 
                             $location = $sender->getLocation();
                             if(is_a($slapperClass, SlapperHuman::class, true)){
@@ -635,9 +633,6 @@ class Main extends PluginBase implements Listener {
                             }
                             $entity->setNameTag($name);
                             $entity->setSlapperVersion($this->getDescription()->getVersion());
-                            if($entity instanceof SlapperHuman){
-                                $entity->getInventory()->setContents($sender->getInventory()->getContents());
-                            }
                             (new SlapperCreationEvent($entity, $slapperClass, $sender, SlapperCreationEvent::CAUSE_COMMAND))->call();
                             $entity->spawnToAll();
                             $sender->sendMessage($this->prefix . $chosenType . " entity spawned with name " . TextFormat::WHITE . "\"" . TextFormat::BLUE . $name . TextFormat::WHITE . "\"" . TextFormat::GREEN . " and entity ID " . TextFormat::BLUE . $entity->getId());

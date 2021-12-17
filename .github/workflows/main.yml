@@ -1,20 +1,3 @@
-Skip to content
-pmmp
-/
-ExamplePlugin
-Public template
-forked from PocketMine/ExamplePlugin
-Code
-Issues
-Pull requests
-Actions
-Security
-Insights
-ExamplePlugin/.github/workflows/main.yml
-@dktapps
-dktapps dir -> directory
- 1 contributor
-40 lines (33 sloc)  956 Bytes
 name: CI
 
 on:
@@ -55,16 +38,3 @@ jobs:
       - name: Run PHPStan
         working-directory: ./phpstan
         run: vendor/bin/phpstan analyze
-© 2021 GitHub, Inc.
-Terms
-Privacy
-Security
-Status
-Docs
-Contact GitHub
-Pricing
-API
-Training
-Blog
-About
-Loading complete

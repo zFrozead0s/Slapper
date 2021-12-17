@@ -21,7 +21,6 @@ Official addons:
 - [SlapBack](https://github.com/Vecnavium/SlapBack)
 
 
-
 # Basic documentation
 
 ## Commands:

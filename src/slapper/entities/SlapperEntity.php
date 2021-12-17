@@ -21,7 +21,7 @@ use pocketmine\world\particle\FloatingTextParticle;
 use slapper\SlapperTrait;
 use slapper\SlapperInterface;
 
-class SlapperEntity extends Human implements SlapperInterface{
+class SlapperEntity extends SlapperHuman implements SlapperInterface{
 	use SlapperTrait;
 
     public static function getNetworkTypeId(): string{

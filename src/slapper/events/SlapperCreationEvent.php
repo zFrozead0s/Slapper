@@ -23,7 +23,7 @@ class SlapperCreationEvent extends EntityEvent {
 
 
     /**
-     * @param Entity      $entity
+     * @param Entity&SlapperInterface      $entity
      * @param string      $type
      * @param Player|null $creator
      * @param int         $cause

@@ -6,8 +6,10 @@ namespace slapper\entities;
 
 use pocketmine\entity\Human;
 use pocketmine\entity\Entity;
+use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
+use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\mcpe\convert\SkinAdapterSingleton;
 use pocketmine\network\mcpe\protocol\PlayerListPacket;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataCollection;

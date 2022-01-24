@@ -620,9 +620,9 @@ class Main extends PluginBase implements Listener {
                                 return true;
                             }
 
-							/** @var class-string $slapperClass */
+                            /** @var class-string $slapperClass */
                             $slapperClass = __NAMESPACE__ . "\\entities\\Slapper$chosenType";
-						    Utils::testValidInstance($slapperClass, SlapperInterface::class);
+                            Utils::testValidInstance($slapperClass, SlapperInterface::class);
 
                             $location = $sender->getLocation();
                             if(is_a($slapperClass, SlapperHuman::class, true)){

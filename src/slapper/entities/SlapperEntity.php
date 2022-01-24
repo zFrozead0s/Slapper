@@ -22,7 +22,7 @@ use slapper\SlapperTrait;
 use slapper\SlapperInterface;
 
 class SlapperEntity extends Entity implements SlapperInterface{
-	use SlapperTrait;
+    use SlapperTrait;
 
     public static function getNetworkTypeId(): string{
         //We are using EntityLegacyIds for BC (#blamejojoe)

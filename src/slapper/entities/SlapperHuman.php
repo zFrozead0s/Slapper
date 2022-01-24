@@ -21,13 +21,13 @@ use slapper\SlapperInterface;
 
 
 class SlapperHuman extends Human implements SlapperInterface{
-	use SlapperTrait;
+    use SlapperTrait;
 
     protected string $menuName;
 
     public function initEntity(CompoundTag $nbt): void{
         $this->menuName = $nbt->getString('MenuName', '');
-		if(($commandsTag = $nbt->getTag('Commands')) instanceof ListTag or $commandsTag instanceof CompoundTag){
+        if(($commandsTag = $nbt->getTag('Commands')) instanceof ListTag or $commandsTag instanceof CompoundTag){
             /** @var StringTag $stringTag */
             foreach($commandsTag as $stringTag){
                 $this->commands[$stringTag->getValue()] = true;
@@ -39,7 +39,7 @@ class SlapperHuman extends Human implements SlapperInterface{
     public function saveNBT(): CompoundTag {
         $nbt = parent::saveNBT();
         $nbt->setString('MenuName', $this->menuName);
-		$commandsTag = new ListTag([], NBT::TAG_String);
+        $commandsTag = new ListTag([], NBT::TAG_String);
         $nbt->setTag('Commands', $commandsTag);
         foreach($this->commands as $command => $bool){
             $commandsTag->push(new StringTag($command));

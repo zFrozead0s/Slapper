@@ -21,7 +21,7 @@ use pocketmine\world\particle\FloatingTextParticle;
 use slapper\SlapperTrait;
 use slapper\SlapperInterface;
 
-class SlapperEntity extends SlapperHuman implements SlapperInterface{
+class SlapperEntity extends Entity implements SlapperInterface{
 	use SlapperTrait;
 
     public static function getNetworkTypeId(): string{
@@ -38,14 +38,6 @@ class SlapperEntity extends SlapperHuman implements SlapperInterface{
     private CompoundTag $namedTagHack;
 
     private FloatingTextParticle $particle;
-
-    /**
-     * @var true[]
-     * @phpstan-var array<string, true>
-     */
-    protected array $commands = [];
-
-    protected string $version;
 
     public function __construct(Location $location, ?CompoundTag $nbt = null) {
         $this->particle = new FloatingTextParticle('');
@@ -112,31 +104,6 @@ class SlapperEntity extends SlapperHuman implements SlapperInterface{
     }
 
     public function getInitialSizeInfo(): EntitySizeInfo{ return new EntitySizeInfo(static::HEIGHT, $this->width); }
-
-    /** @return string[] */
-    public function getCommands(): array{
-        return array_keys($this->commands);
-    }
-
-    public function addCommand(string $command): void{
-        $this->commands[$command] = true;
-    }
-
-    public function hasCommand(string $command): bool{
-        return isset($this->commands[$command]);
-    }
-
-    public function removeCommand(string $command): void{
-        unset($this->commands[$command]);
-    }
-
-    public function setSlapperVersion(string $version): void{
-        $this->version = $version;
-    }
-
-    public function getSlapperVersion(): string{
-        return $this->version;
-    }
 
     /** @param Player[] $players */
     private function spawnParticleToPlayers(array $players): void{

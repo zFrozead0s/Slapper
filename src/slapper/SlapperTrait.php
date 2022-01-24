@@ -14,6 +14,14 @@ trait SlapperTrait {
     protected bool $networkPropertiesDirty = false;
 
     /**
+     * @var true[]
+     * @phpstan-var array<string, true>
+     */
+    protected array $commands = [];
+
+    protected string $version;
+
+    /**
      * @return string
      */
     abstract public function getNameTag(): string;
@@ -37,5 +45,30 @@ trait SlapperTrait {
             "{nametag}" => $player->getNameTag()
         ];
         return str_replace(array_keys($vars), array_values($vars), $this->getNameTag());
+    }
+
+    /** @return string[] */
+    public function getCommands(): array{
+        return array_keys($this->commands);
+    }
+
+    public function addCommand(string $command): void{
+        $this->commands[$command] = true;
+    }
+
+    public function hasCommand(string $command): bool{
+        return isset($this->commands[$command]);
+    }
+
+    public function removeCommand(string $command): void{
+        unset($this->commands[$command]);
+    }
+
+    public function setSlapperVersion(string $version): void{
+        $this->version = $version;
+    }
+
+    public function getSlapperVersion(): string{
+        return $this->version;
     }
 }

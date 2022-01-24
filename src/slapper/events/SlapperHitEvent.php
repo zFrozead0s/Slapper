@@ -10,6 +10,7 @@ use pocketmine\event\CancellableTrait;
 use pocketmine\event\entity\EntityEvent;
 use pocketmine\player\Player;
 
+/** @phpstan-extends EntityEvent<Entity&SlapperInterface> */
 class SlapperHitEvent extends EntityEvent implements Cancellable {
     use CancellableTrait;
 

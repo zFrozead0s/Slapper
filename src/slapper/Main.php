@@ -503,9 +503,9 @@ class Main extends PluginBase implements Listener {
                                                     if (count($commands) > 0) {
                                                         $id = 0;
 
-                                                        foreach ($commands as $command) {
+                                                        foreach ($commands as $slapperCommand) {
                                                             $id++;
-                                                            $sender->sendMessage(TextFormat::GREEN . "[" . TextFormat::YELLOW . "S" . TextFormat::GREEN . "] " . TextFormat::YELLOW . $id . ". " . TextFormat::GREEN . $command . "\n");
+                                                            $sender->sendMessage(TextFormat::GREEN . "[" . TextFormat::YELLOW . "S" . TextFormat::GREEN . "] " . TextFormat::YELLOW . $id . ". " . TextFormat::GREEN . $slapperCommand . "\n");
                                                         }
                                                     } else {
                                                         $sender->sendMessage($this->prefix . "That entity does not have any commands.");

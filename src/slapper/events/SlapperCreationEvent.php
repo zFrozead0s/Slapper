@@ -7,7 +7,9 @@ namespace slapper\events;
 use pocketmine\entity\Entity;
 use pocketmine\event\entity\EntityEvent;
 use pocketmine\player\Player;
+use slapper\SlapperInterface;
 
+/** @phpstan-extends EntityEvent<Entity&SlapperInterface> */
 class SlapperCreationEvent extends EntityEvent {
 
     const CAUSE_COMMAND = 0;
@@ -21,7 +23,7 @@ class SlapperCreationEvent extends EntityEvent {
 
 
     /**
-     * @param Entity      $entity
+     * @param Entity&SlapperInterface      $entity
      * @param string      $type
      * @param Player|null $creator
      * @param int         $cause

@@ -6,7 +6,10 @@ namespace slapper\entities;
 
 use pocketmine\entity\Human;
 use pocketmine\entity\Entity;
+use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\ListTag;
+use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\mcpe\convert\SkinAdapterSingleton;
 use pocketmine\network\mcpe\protocol\PlayerListPacket;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataCollection;
@@ -20,17 +23,30 @@ use slapper\SlapperInterface;
 
 
 class SlapperHuman extends Human implements SlapperInterface{
-	use SlapperTrait;
+    use SlapperTrait;
 
     protected string $menuName;
 
     public function initEntity(CompoundTag $nbt): void{
         $this->menuName = $nbt->getString('MenuName', '');
+        if(($commandsTag = $nbt->getTag('Commands')) instanceof ListTag or $commandsTag instanceof CompoundTag){
+            /** @var StringTag $stringTag */
+            foreach($commandsTag as $stringTag){
+                $this->commands[$stringTag->getValue()] = true;
+            }
+        }
+        $this->version = $nbt->getString('SlapperVersion', '');
     }
 
     public function saveNBT(): CompoundTag {
         $nbt = parent::saveNBT();
         $nbt->setString('MenuName', $this->menuName);
+        $commandsTag = new ListTag([], NBT::TAG_String);
+        $nbt->setTag('Commands', $commandsTag);
+        foreach($this->commands as $command => $bool){
+            $commandsTag->push(new StringTag($command));
+        }
+        $nbt->setString('SlapperVersion', $this->version);
         return $nbt;
     }
 
@@ -41,11 +57,6 @@ class SlapperHuman extends Human implements SlapperInterface{
     public function getNameName(): string{
         return $this->menuName;
     }
-
-
-	public function setSlapperVersion(string $version): void{
-		$this->version = $version;
-	}
 
     /**
      * @param Player[]|null $targets

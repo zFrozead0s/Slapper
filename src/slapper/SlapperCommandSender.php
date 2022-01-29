@@ -15,7 +15,7 @@ use pocketmine\Server;
 class SlapperCommandSender implements CommandSender{
     use PermissibleDelegateTrait;
 
-    protected $lineHeight = null;
+    protected ?int $lineHeight = null;
 
     private Server $server;
     private Language $language;

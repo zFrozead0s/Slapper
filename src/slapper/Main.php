@@ -116,9 +116,9 @@ class Main extends PluginBase implements Listener {
         "Emite" => "Endermite"
     ];
 
-    /** @var array */
+    /** @var array<string, true> */
     public $hitSessions = [];
-    /** @var array */
+    /** @var array<string, true> */
     public $idSessions = [];
     /** @var string */
     public $prefix = TextFormat::GREEN . "[" . TextFormat::YELLOW . "Slapper" . TextFormat::GREEN . "] ";
@@ -197,12 +197,12 @@ class Main extends PluginBase implements Listener {
             $entityName = substr($className, $stringPos);
             $entityFactory->register($className, static function(World $world, CompoundTag $nbt) use($className): SlapperEntity{
                 /** @var SlapperEntity $entityClass */
-                $entityClass = new $className(EntityDataHelper::parseLocation($world, $nbt), $nbt);
+                $entityClass = new $className(EntityDataHelper::parseLocation($nbt, $world), $nbt);
                 return $entityClass;
             }, [$entityName], $className::TYPE_ID);
         }
         $entityFactory->register(SlapperHuman::class, static function(World $world, CompoundTag $nbt): SlapperHuman{
-            return new SlapperHuman(EntityDataHelper::parseLocation($world, $nbt), Human::parseSkinNBT($nbt), $nbt);
+            return new SlapperHuman(EntityDataHelper::parseLocation($nbt, $world), Human::parseSkinNBT($nbt), $nbt);
         }, ['Human']);
     }
 
@@ -300,7 +300,7 @@ class Main extends PluginBase implements Listener {
                                 $world = $sender->getWorld();
                                 $entity = $world->getEntity((int) $args[0]);
                                 if ($entity !== null) {
-                                    if ($entity instanceof SlapperEntity || $entity instanceof SlapperHuman) {
+                                    if ($entity instanceof SlapperInterface) {
                                         if (isset($args[1])) {
                                             switch ($args[1]) {
                                                 case "helm":
@@ -503,9 +503,9 @@ class Main extends PluginBase implements Listener {
                                                     if (count($commands) > 0) {
                                                         $id = 0;
 
-                                                        foreach ($commands as $command) {
+                                                        foreach ($commands as $slapperCommand) {
                                                             $id++;
-                                                            $sender->sendMessage(TextFormat::GREEN . "[" . TextFormat::YELLOW . "S" . TextFormat::GREEN . "] " . TextFormat::YELLOW . $id . ". " . TextFormat::GREEN . $command . "\n");
+                                                            $sender->sendMessage(TextFormat::GREEN . "[" . TextFormat::YELLOW . "S" . TextFormat::GREEN . "] " . TextFormat::YELLOW . $id . ". " . TextFormat::GREEN . $slapperCommand . "\n");
                                                         }
                                                     } else {
                                                         $sender->sendMessage($this->prefix . "That entity does not have any commands.");
@@ -593,11 +593,11 @@ class Main extends PluginBase implements Listener {
                         case "spanw":
                             $type = array_shift($args);
                             $name = str_replace(["{color}", "{line}"], ["§", "\n"], trim(implode(" ", $args)));
-                            if ($type === null || empty(trim($type))) {
+                            if ($type === null || trim($type) === "") {
                                 $sender->sendMessage($this->prefix . "Please enter an entity type.");
                                 return true;
                             }
-                            if (empty($name)) {
+                            if ($name === "") {
                                 $name = $sender->getDisplayName();
                             }
                             $types = self::ENTITY_TYPES;
@@ -620,8 +620,9 @@ class Main extends PluginBase implements Listener {
                                 return true;
                             }
 
+                            /** @var class-string $slapperClass */
                             $slapperClass = __NAMESPACE__ . "\\entities\\Slapper$chosenType";
-						Utils::testValidInstance($slapperClass, SlapperInterface::class);
+                            Utils::testValidInstance($slapperClass, SlapperInterface::class);
 
                             $location = $sender->getLocation();
                             if(is_a($slapperClass, SlapperHuman::class, true)){
@@ -656,7 +657,7 @@ class Main extends PluginBase implements Listener {
      */
     public function onEntityDamage(EntityDamageEvent $event): void {
         $entity = $event->getEntity();
-        if ($entity instanceof SlapperEntity || $entity instanceof SlapperHuman) {
+        if ($entity instanceof SlapperInterface) {
             $event->cancel();
             if (!$event instanceof EntityDamageByEntityEvent) {
                 return;

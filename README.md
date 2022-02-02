@@ -14,6 +14,9 @@
 Official addons:
 - [SlapperRotation](https://github.com/Vecnavium/SlapperRotation)
 - [SlapperCooldown](https://github.com/Vecnavium/SlapperCooldown)
+- [SlapBack](https://github.com/vecnavium-pm-pl/SlapBack)
+- [SlapperCache](https://github.com/Vecnavium/SlapperCache)
+- [SlapperPlus](https://github.com/Vecnavium/SlapperPlus)
 
 
 

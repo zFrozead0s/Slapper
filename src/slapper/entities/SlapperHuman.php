@@ -28,6 +28,7 @@ class SlapperHuman extends Human implements SlapperInterface{
     protected string $menuName;
 
     public function initEntity(CompoundTag $nbt): void{
+		parent::initEntity($nbt);
         $this->menuName = $nbt->getString('MenuName', '');
         if(($commandsTag = $nbt->getTag('Commands')) instanceof ListTag or $commandsTag instanceof CompoundTag){
             /** @var StringTag $stringTag */

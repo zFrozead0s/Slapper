@@ -37,6 +37,7 @@ class SlapperHuman extends Human implements SlapperInterface{
             }
         }
         $this->version = $nbt->getString('SlapperVersion', '');
+		$this->setNameTagAlwaysVisible(true);
     }
 
     public function saveNBT(): CompoundTag {

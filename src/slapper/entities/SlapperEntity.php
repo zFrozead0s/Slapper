@@ -14,6 +14,7 @@ use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\mcpe\protocol\types\entity\EntityIds;
+use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataCollection;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataProperties;
 use pocketmine\network\mcpe\protocol\types\entity\MetadataProperty;
 use pocketmine\player\Player;
@@ -38,6 +39,8 @@ class SlapperEntity extends Entity implements SlapperInterface{
     private CompoundTag $namedTagHack;
 
     private FloatingTextParticle $particle;
+
+	private bool $nameTagDirty = false;
 
     public function __construct(Location $location, ?CompoundTag $nbt = null) {
         $this->particle = new FloatingTextParticle('');
@@ -71,6 +74,11 @@ class SlapperEntity extends Entity implements SlapperInterface{
         return $nbt;
     }
 
+	public function setNameTag(string $name): void {
+		parent::setNameTag($name);
+		$this->nameTagDirty = true;
+	}
+
     protected function sendSpawnPacket(Player $player): void {
         parent::sendSpawnPacket($player);
 
@@ -93,8 +101,9 @@ class SlapperEntity extends Entity implements SlapperInterface{
         $targets ??= $this->hasSpawned;
         $data ??= $this->getAllNetworkData();
         parent::sendData($targets, $data);
-        if(isset($data[EntityMetadataProperties::NAMETAG])){
+        if($this->nameTagDirty){
             $this->spawnParticleToPlayers($targets);
+			$this->nameTagDirty = false;
         }
     }
 
@@ -138,4 +147,9 @@ class SlapperEntity extends Entity implements SlapperInterface{
     public function __isset(string $name): bool{
         return $name === 'namedtag';
     }
+
+	protected function syncNetworkData(EntityMetadataCollection $properties): void {
+		parent::syncNetworkData($properties);
+		$properties->setString(EntityMetadataProperties::NAMETAG, "");
+	}
 }

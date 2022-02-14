@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace slapper\entities;
 
+use pocketmine\data\bedrock\EntityLegacyIds;
+
 class SlapperHusk extends SlapperEntity {
 
-    const TYPE_ID = 47;
+    const TYPE_ID = EntityLegacyIds::HUSK;
     const HEIGHT = 1.95;
 
 }

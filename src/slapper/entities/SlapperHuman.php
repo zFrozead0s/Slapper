@@ -5,37 +5,83 @@ declare(strict_types=1);
 namespace slapper\entities;
 
 use pocketmine\entity\Human;
-use pocketmine\level\Level;
+use pocketmine\entity\Entity;
+use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\network\mcpe\protocol\SetActorDataPacket as SetEntityDataPacket;
-use pocketmine\Player;
+use pocketmine\nbt\tag\ListTag;
+use pocketmine\nbt\tag\StringTag;
+use pocketmine\network\mcpe\convert\SkinAdapterSingleton;
+use pocketmine\network\mcpe\protocol\PlayerListPacket;
+use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataCollection;
+use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataProperties;
+use pocketmine\network\mcpe\protocol\types\entity\MetadataProperty;
+use pocketmine\network\mcpe\protocol\types\entity\StringMetadataProperty;
+use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
+use pocketmine\player\Player;
 use slapper\SlapperTrait;
+use slapper\SlapperInterface;
 
-class SlapperHuman extends Human {
+
+class SlapperHuman extends Human implements SlapperInterface{
     use SlapperTrait;
 
-    public function __construct(Level $level, CompoundTag $nbt) {
-        parent::__construct($level, $nbt);
-        $this->prepareMetadata();
+    protected string $menuName;
+
+    public function initEntity(CompoundTag $nbt): void{
+		parent::initEntity($nbt);
+        $this->menuName = $nbt->getString('MenuName', '');
+        if(($commandsTag = $nbt->getTag('Commands')) instanceof ListTag or $commandsTag instanceof CompoundTag){
+            /** @var StringTag $stringTag */
+            foreach($commandsTag as $stringTag){
+                $this->commands[$stringTag->getValue()] = true;
+            }
+        }
+        $this->version = $nbt->getString('SlapperVersion', '');
+		$this->setNameTagAlwaysVisible(true);
     }
 
-    public function saveNBT(): void {
-        parent::saveNBT();
-        $this->saveSlapperNbt();
+    public function saveNBT(): CompoundTag {
+        $nbt = parent::saveNBT();
+        $nbt->setString('MenuName', $this->menuName);
+        $commandsTag = new ListTag([], NBT::TAG_String);
+        $nbt->setTag('Commands', $commandsTag);
+        foreach($this->commands as $command => $bool){
+            $commandsTag->push(new StringTag($command));
+        }
+        $nbt->setString('SlapperVersion', $this->version);
+        return $nbt;
     }
 
-    public function sendNameTag(Player $player): void {
-        $pk = new SetEntityDataPacket();
-        $pk->entityRuntimeId = $this->getId();
-        $pk->metadata = [self::DATA_NAMETAG => [self::DATA_TYPE_STRING, $this->getDisplayName($player)]];
-        $player->dataPacket($pk);
+    public function setMenuName(string $menuName): void{
+        $this->menuName = $menuName;
+    }
+
+    public function getNameName(): string{
+        return $this->menuName;
+    }
+
+    /**
+     * @param Player[]|null $targets
+     * @param MetadataProperty[] $data
+     */
+    public function sendData(?array $targets, ?array $data = null): void{
+        $targets = $targets ?? $this->hasSpawned;
+        $data = $data ?? $this->getAllNetworkData();
+        if(!isset($data[EntityMetadataProperties::NAMETAG])){
+            parent::sendData($targets, $data);
+            return;
+        }
+        foreach($targets as $p){
+            $data[EntityMetadataProperties::NAMETAG] = new StringMetadataProperty($this->getDisplayName($p));
+            $p->getNetworkSession()->syncActorData($this, $data);
+        }
     }
 
     protected function sendSpawnPacket(Player $player): void {
         parent::sendSpawnPacket($player);
 
-        if (($menuName = $this->namedtag->getString("MenuName", "", true)) !== "") {
-            $player->getServer()->updatePlayerListData($this->getUniqueId(), $this->getId(), $menuName, $this->skin, "", [$player]);
+        if ($this->menuName !== "") {
+            $player->getNetworkSession()->sendDataPacket(PlayerListPacket::add([PlayerListEntry::createAdditionEntry($this->getUniqueId(), $this->getId(), $this->menuName, SkinAdapterSingleton::get()->toSkinData($this->getSkin()), '')]));
         }
     }
 }

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace slapper\entities;
 
+use pocketmine\data\bedrock\EntityLegacyIds;
+
 class SlapperMushroomCow extends SlapperEntity {
 
-    const TYPE_ID = 16;
+    const TYPE_ID = EntityLegacyIds::MOOSHROOM;
     const HEIGHT = 1.4;
 
 }

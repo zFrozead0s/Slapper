@@ -9,16 +9,14 @@
     <img href="https://discord.gg/6M9tGyWPjr"><img src="https://img.shields.io/discord/837701868649709568?label=discord&color=7289DA&logo=discord" alt="Discord" /></a>
 </p>
 
-## NOTICE
-This plugin has not been abandoned during the updating of the Slapper. There has been some slight complicaions which is slowing the project down on updating it to API 4 
-so please be patient this project will be moving again soon. Hasting me will not speed up the process in any way
-
 ## Addons
 
 Official addons:
 - [SlapperRotation](https://github.com/Vecnavium/SlapperRotation)
 - [SlapperCooldown](https://github.com/Vecnavium/SlapperCooldown)
-- [SlapBack](https://github.com/Vecnavium/SlapBack)
+- [SlapBack](https://github.com/vecnavium-pm-pl/SlapBack)
+- [SlapperCache](https://github.com/Vecnavium/SlapperCache)
+- [SlapperPlus](https://github.com/Vecnavium/SlapperPlus)
 
 
 # Basic documentation

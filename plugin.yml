@@ -1,16 +1,16 @@
 name: Slapper
 author: [Vecnavium, jojoe77777]
-version: 1.6.3
+version: 2.0.1
 description: Slapper, the NPC plugin for PocketMine-MP
 main: slapper\Main
-api: 3.13.0
-mcpe-protocol: [465, 471, 475]
+api: 4.0.0
+mcpe-protocol: 486
 
 commands:
   slapper:
     description: Create a Slapper NPC, or edit an existing one!
     usage: "/slapper [args]..."
-    permission: slapper.command
+    permission: slapper.create;slapper.edit;slapper.remove;slapper.id;slapper.help
   rca:
     description: Execute a command as someone else!
     usage: "/rca <player> <command>"
@@ -21,31 +21,27 @@ commands:
     permission: slapper.nothing
 
 permissions:
-  slapper:
-    description: Allow using all Slapper commands
-    default: op
-    children:
-      slapper.command:
-        description: Allow using /slapper
+    slapper.command:
+        description: Allow using command /slapper
         default: op
-      slapper.create:
+    slapper.create:
         description: Allow using command /slapper create
         default: op
-      slapper.edit:
+    slapper.edit:
         description: Allow editing Slapper entity data with /slapper edit
         default: op
-      slapper.nothing:
+    slapper.nothing:
         description: Allow doing nothing
         default: op
-      slapper.rca:
+    slapper.rca:
         description: Allow running commands as other players
         default: op
-      slapper.remove:
+    slapper.remove:
         description: Allow removing Slapper entities with /slapper remove [id]
         default: op
-      slapper.id:
+    slapper.id:
         description: Allow viewing entity ID
         default: op
-      slapper.help:
+    slapper.help:
         description: Allow viewing Slapper help page
         default: op

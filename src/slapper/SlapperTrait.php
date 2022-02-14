@@ -4,83 +4,71 @@ declare(strict_types=1);
 
 namespace slapper;
 
-use pocketmine\entity\DataPropertyManager;
-use pocketmine\entity\Entity;
-use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\FloatTag;
-use pocketmine\nbt\tag\IntTag;
-use pocketmine\network\mcpe\protocol\SetActorDataPacket as SetEntityDataPacket;
-use pocketmine\Player;
+use pocketmine\player\Player;
 
 /**
  * Trait containing methods used in various Slappers.
  */
 trait SlapperTrait {
-    /** @var CompoundTag */
-    public $namedtag;
+
+    protected bool $networkPropertiesDirty = false;
 
     /**
-     * @return DataPropertyManager
+     * @var true[]
+     * @phpstan-var array<string, true>
      */
-    abstract public function getDataPropertyManager(): DataPropertyManager;
+    protected array $commands = [];
+
+    protected string $version;
 
     /**
      * @return string
      */
     abstract public function getNameTag(): string;
 
-    abstract public function sendNameTag(Player $player): void;
-
-    abstract public function setGenericFlag(int $flag, bool $value = true): void;
+    public function tryChangeMovement(): void {
+        //NOOP
+    }
 
     public function prepareMetadata(): void {
-        $this->setGenericFlag(Entity::DATA_FLAG_IMMOBILE, true);
-        if (!$this->namedtag->hasTag("Scale", FloatTag::class)) {
-            $this->namedtag->setFloat("Scale", 1.0, true);
-        }
-        $this->getDataPropertyManager()->setFloat(Entity::DATA_SCALE, $this->namedtag->getFloat("Scale"));
+        $this->networkPropertiesDirty = true;
     }
 
-    public function tryChangeMovement(): void {
-
-    }
-
-    public function sendData($playerList, array $data = null): void {
-        if(!is_array($playerList)){
-            $playerList = [$playerList];
-        }
-
-        foreach($playerList as $p){
-            $playerData = $data ?? $this->getDataPropertyManager()->getAll();
-            unset($playerData[self::DATA_NAMETAG]);
-            $pk = new SetEntityDataPacket();
-            $pk->entityRuntimeId = $this->getId();
-            $pk->metadata = $playerData;
-            $p->dataPacket($pk);
-
-            $this->sendNameTag($p);
-        }
-    }
-
-    public function saveSlapperNbt(): void {
-        $visibility = 0;
-        if ($this->isNameTagVisible()) {
-            $visibility = 1;
-            if ($this->isNameTagAlwaysVisible()) {
-                $visibility = 2;
-            }
-        }
-        $scale = $this->getDataPropertyManager()->getFloat(Entity::DATA_SCALE);
-        $this->namedtag->setInt("NameVisibility", $visibility, true);
-        $this->namedtag->setFloat("Scale", $scale, true);
+    public function sendData(?array $playerList, ?array $data = null): void {
+        //NOOP
     }
 
     public function getDisplayName(Player $player): string {
         $vars = [
             "{name}" => $player->getName(),
-            "{display_name}" => $player->getName(),
+            "{display_name}" => $player->getDisplayName(),
             "{nametag}" => $player->getNameTag()
         ];
         return str_replace(array_keys($vars), array_values($vars), $this->getNameTag());
+    }
+
+    /** @return string[] */
+    public function getCommands(): array{
+        return array_keys($this->commands);
+    }
+
+    public function addCommand(string $command): void{
+        $this->commands[$command] = true;
+    }
+
+    public function hasCommand(string $command): bool{
+        return isset($this->commands[$command]);
+    }
+
+    public function removeCommand(string $command): void{
+        unset($this->commands[$command]);
+    }
+
+    public function setSlapperVersion(string $version): void{
+        $this->version = $version;
+    }
+
+    public function getSlapperVersion(): string{
+        return $this->version;
     }
 }

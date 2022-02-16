@@ -19,7 +19,6 @@ Official addons:
 - [SlapperPlus](https://github.com/Vecnavium/SlapperPlus)
 
 
-
 # Basic documentation
 
 ## Commands:

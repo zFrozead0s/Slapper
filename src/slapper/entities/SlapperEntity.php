@@ -60,7 +60,7 @@ class SlapperEntity extends Entity implements SlapperInterface{
         $this->setImmobile(true);
         $this->setNameTagVisible(false);
 
-		if($nbt->getFloat("Scale", -1) !== -1){
+		if($nbt->getTag("Scale") !== null){
 			$this->setScale($nbt->getFloat("Scale"));
 		}
     }

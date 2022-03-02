@@ -29,6 +29,7 @@ use pocketmine\utils\Utils;
 use pocketmine\world\Location;
 use pocketmine\world\World;
 use slapper\entities\other\SlapperBoat;
+use slapper\entities\SlapperEndCrystal;
 use slapper\entities\other\SlapperFallingSand;
 use slapper\entities\other\SlapperMinecart;
 use slapper\entities\other\SlapperPrimedTNT;
@@ -99,7 +100,7 @@ class Main extends PluginBase implements Listener {
         "Husk", "WitherSkeleton", "IronGolem", "Snowman",
         "LavaSlime", "Squid", "ElderGuardian", "Endermite",
         "Evoker", "Guardian", "PolarBear", "Shulker",
-        "Vex", "Vindicator", "Wither", "Llama"
+        "Vex", "Vindicator", "Wither", "Llama", "EndCrystal"
     ];
 
     const ENTITY_ALIASES = [
@@ -188,7 +189,7 @@ class Main extends PluginBase implements Listener {
              SlapperFallingSand::class, SlapperElderGuardian::class, SlapperEndermite::class,
              SlapperEvoker::class, SlapperGuardian::class, SlapperLlama::class,
              SlapperPolarBear::class, SlapperShulker::class, SlapperVex::class,
-             SlapperVindicator::class, SlapperWither::class
+             SlapperVindicator::class, SlapperWither::class, SlapperEndCrystal::class
         ] as $className){
             $stringPos = strpos($className, 'Slapper');
             if($stringPos === false){

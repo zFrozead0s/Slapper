@@ -59,6 +59,10 @@ class SlapperEntity extends Entity implements SlapperInterface{
         $this->version = $nbt->getString('SlapperVersion', '');
         $this->setImmobile(true);
         $this->setNameTagVisible(false);
+
+		if($nbt->getFloat("Scale", -1) !== -1){
+			$this->setScale($nbt->getFloat("Scale"));
+		}
     }
 
     //For backwards-compatibility
@@ -71,6 +75,7 @@ class SlapperEntity extends Entity implements SlapperInterface{
             $commandsTag->push(new StringTag($command));
         }
         $nbt->setString('SlapperVersion', $this->version);
+		$nbt->setFloat("Scale", $this->scale);
         return $nbt;
     }
 

@@ -59,4 +59,8 @@ class SlapperCommandSender implements CommandSender{
         }
         $this->lineHeight = $height;
     }
+
+	public function hasPermission($name) : bool{
+		return true;
+	}
 }

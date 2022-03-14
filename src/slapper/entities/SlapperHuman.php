@@ -27,8 +27,11 @@ class SlapperHuman extends Human implements SlapperInterface{
 
     protected string $menuName;
 
+    private CompoundTag $namedTagHack;
+
     public function initEntity(CompoundTag $nbt): void{
 		parent::initEntity($nbt);
+        $this->namedTagHack = $nbt;
         $this->menuName = $nbt->getString('MenuName', '');
         if(($commandsTag = $nbt->getTag('Commands')) instanceof ListTag or $commandsTag instanceof CompoundTag){
             /** @var StringTag $stringTag */
@@ -42,6 +45,7 @@ class SlapperHuman extends Human implements SlapperInterface{
 
     public function saveNBT(): CompoundTag {
         $nbt = parent::saveNBT();
+        $nbt = $nbt->merge($this->namedTagHack);
         $nbt->setString('MenuName', $this->menuName);
         $commandsTag = new ListTag([], NBT::TAG_String);
         $nbt->setTag('Commands', $commandsTag);
@@ -84,4 +88,29 @@ class SlapperHuman extends Human implements SlapperInterface{
             $player->getNetworkSession()->sendDataPacket(PlayerListPacket::add([PlayerListEntry::createAdditionEntry($this->getUniqueId(), $this->getId(), $this->menuName, SkinAdapterSingleton::get()->toSkinData($this->getSkin()), '')]));
         }
     }
+
+    //For backwards-compatibility
+    public function __get(string $name) : mixed {
+        if($name === 'namedtag') {
+            return $this->namedTagHack;
+        }
+        throw new \ErrorException('Undefined property: ' . get_class($this) . "::\$" . $name);
+    }
+
+    //For backwards-compatibility
+    public function __set(string $name, mixed $value) : void {
+        if($name === 'namedtag') {
+            if(!$value instanceof CompoundTag) {
+                throw new \TypeError('Typed property ' . get_class($this) . "::\$namedtag must be " . CompoundTag::class . ', ' . gettype($value) . 'used');
+            }
+            $this->namedTagHack = $value;
+        }
+        throw new \ErrorException('Undefined property: ' . get_class($this) . "::\$" . $name);
+    }
+
+    //For backwards-compatibility
+    public function __isset(string $name) : bool {
+        return $name === 'namedtag';
+    }
+
 }

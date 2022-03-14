@@ -168,6 +168,7 @@ class Main extends PluginBase implements Listener {
         $this->commandSender = new SlapperCommandSender($this);
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
         $this->registerEntities();
+		$this->checkUpdate();
     }
     public function registerEntities(): void {
         $entityFactory = EntityFactory::getInstance();
@@ -207,8 +208,14 @@ class Main extends PluginBase implements Listener {
         }, ['Human']);
     }
 
+	public function checkUpdate(bool $isRetry = false): void {
 
-    /**
+		$this->getServer()->getAsyncPool()->submitTask(new CheckUpdateTask($this->getDescription()->getName(), $this->getDescription()->getVersion()));
+	}
+
+
+
+	/**
      * @param CommandSender $sender
      * @param Command       $command
      * @param string        $label

@@ -140,6 +140,7 @@ class Main extends PluginBase implements Listener {
         "remove: /slapper remove [id]",
         "version: /slapper version",
         "cancel: /slapper cancel",
+        "entitys: /slapper entitys",
     ];
     /** @var string[] */
     public $editArgs = [
@@ -270,6 +271,15 @@ class Main extends PluginBase implements Listener {
                             unset($this->hitSessions[$sender->getName()]);
                             unset($this->idSessions[$sender->getName()]);
                             $sender->sendMessage($this->prefix . "Cancelled.");
+                            return true;
+                        case "list":
+                        case "entitys":
+                            if (!$sender->hasPermission("slapper.list")) {
+                                $sender->sendMessage($this->noperm);
+                                return true;
+                            }
+                            $sender->sendMessage($this->prefix . "Entity List."
+. TextFormat::BLUE . "Creeper, Bat, Sheep, PigZombie, Ghast, Blaze, IronGolem, Snowman, Ocelot, ZombieVillager, Cow, Zombie, Squid, Villager, Spider, Pig, MushroomCow, Wolf, LavaSlime, Silverfish, Skeleton, Slime, Chicken, Enderman, CaveSpider, Boat, Minecart, Mule, Witch, PrimedTNT, Horse, Donkey, SkeletonHorse, ZombieHorse, Rabbit, Stray, Husk, WitherSkeleton, FallingSand, ElderGuardian, Endermite, Evoker, Guardian, Llama, PolarBear, Shulker, Vex, Vindicator, Wither, EndCrystal");
                             return true;
                         case "remove":
                             if (!$sender->hasPermission("slapper.remove")) {

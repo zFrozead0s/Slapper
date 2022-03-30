@@ -39,6 +39,9 @@ permissions:
     slapper.id:
         description: Allow viewing entity ID
         default: op
+    slapper.list:
+        description: Allow viewing of a list of Entitys
+        default: op
     slapper.help:
         description: Allow viewing Slapper help page
         default: op

@@ -7,8 +7,6 @@ namespace slapper;
 use pocketmine\block\BlockFactory;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
-use pocketmine\command\ConsoleCommandSender;
-use pocketmine\entity\Entity;
 use pocketmine\entity\EntityDataHelper;
 use pocketmine\entity\EntityFactory;
 use pocketmine\entity\Human;
@@ -26,7 +24,6 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\utils\AssumptionFailedError;
 use pocketmine\utils\TextFormat;
 use pocketmine\utils\Utils;
-use pocketmine\world\Location;
 use pocketmine\world\World;
 use slapper\entities\other\SlapperBoat;
 use slapper\entities\SlapperEndCrystal;
@@ -210,7 +207,6 @@ class Main extends PluginBase implements Listener {
     }
 
 	public function checkUpdate(bool $isRetry = false): void {
-
 		$this->getServer()->getAsyncPool()->submitTask(new CheckUpdateTask($this->getDescription()->getName(), $this->getDescription()->getVersion()));
 	}
 
@@ -236,12 +232,11 @@ class Main extends PluginBase implements Listener {
                 $player = $this->getServer()->getPlayerByPrefix(array_shift($args));
                 if ($player instanceof Player) {
                     $this->getServer()->dispatchCommand($player, trim(implode(" ", $args)));
-                    return true;
-                } else {
+				} else {
                     $sender->sendMessage($this->prefix . "Player not found.");
-                    return true;
-                }
-            case "slapper":
+				}
+				return true;
+			case "slapper":
                 if ($sender instanceof Player) {
                     if (!isset($args[0])) {
                         $sender->sendMessage($this->prefix . "Please type '/slapper help'.");
@@ -583,15 +578,14 @@ class Main extends PluginBase implements Listener {
                                 } else {
                                     $sender->sendMessage($this->prefix . "Entity does not exist.");
                                 }
-                                return true;
-                            } else {
+							} else {
                                 $sender->sendMessage($this->helpHeader);
                                 foreach ($this->editArgs as $msgArg) {
                                     $sender->sendMessage(TextFormat::GREEN . " - " . $msgArg . "\n");
                                 }
-                                return true;
-                            }
-                        case "help":
+							}
+							return true;
+						case "help":
                         case "?":
                             $sender->sendMessage($this->helpHeader);
                             foreach ($this->mainArgs as $msgArg) {
@@ -633,8 +627,7 @@ class Main extends PluginBase implements Listener {
                                 return true;
                             }
 
-                            /** @var class-string $slapperClass */
-                            $slapperClass = __NAMESPACE__ . "\\entities\\Slapper$chosenType";
+							$slapperClass = __NAMESPACE__ . "\\entities\\Slapper$chosenType";
                             Utils::testValidInstance($slapperClass, SlapperInterface::class);
 
                             $location = $sender->getLocation();

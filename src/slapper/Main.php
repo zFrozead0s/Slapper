@@ -274,7 +274,7 @@ class Main extends PluginBase implements Listener {
                                 return true;
                             }
                             $sender->sendMessage($this->prefix . "Entity List."
-. TextFormat::BLUE . "Creeper, Bat, Sheep, PigZombie, Ghast, Blaze, IronGolem, Snowman, Ocelot, ZombieVillager, Cow, Zombie, Squid, Villager, Spider, Pig, MushroomCow, Wolf, LavaSlime, Silverfish, Skeleton, Slime, Chicken, Enderman, CaveSpider, Boat, Minecart, Mule, Witch, PrimedTNT, Horse, Donkey, SkeletonHorse, ZombieHorse, Rabbit, Stray, Husk, WitherSkeleton, FallingSand, ElderGuardian, Endermite, Evoker, Guardian, Llama, PolarBear, Shulker, Vex, Vindicator, Wither, EndCrystal");
+. TextFormat::BLUE . "Bat, Blaze, Boat, CaveSpider, Chicken, Cow, Creeper, Donkey, ElderGuardian, EndCrystal, Enderman, Endermite, Evoker, FallingSand, Ghast, Guardian, Horse, Human, Husk, IronGolem, LavaSlime, Llama, Minecart, Mule, MushroomCow, Ocelot, Pig, PigZombie, PolarBear, PrimedTNT, Rabbit, Sheep, Shulker, Silverfish, Skeleton, SkeletonHorse, Slime, Snowman, Spider, Squid, Stray, Vex, Villager, Vindicator, Witch, Wither, WitherSkeleton, Wolf, Zombie, ZombieHorse, ZombieVillager");
                             return true;
                         case "remove":
                             if (!$sender->hasPermission("slapper.remove")) {

@@ -137,7 +137,7 @@ class Main extends PluginBase implements Listener {
         "remove: /slapper remove [id]",
         "version: /slapper version",
         "cancel: /slapper cancel",
-        "entitys: /slapper entitys",
+        "entities: /slapper entities",
     ];
     /** @var string[] */
     public $editArgs = [
@@ -268,7 +268,7 @@ class Main extends PluginBase implements Listener {
                             $sender->sendMessage($this->prefix . "Cancelled.");
                             return true;
                         case "list":
-                        case "entitys":
+                        case "entities":
                             if (!$sender->hasPermission("slapper.list")) {
                                 $sender->sendMessage($this->noperm);
                                 return true;

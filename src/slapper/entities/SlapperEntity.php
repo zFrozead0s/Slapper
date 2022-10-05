@@ -126,7 +126,7 @@ class SlapperEntity extends Entity implements SlapperInterface{
     }
 
     //For backwards-compatibility
-    public function __get(string $name): CompoundTag{
+    public function __get(string $name): mixed{
         if($name === 'namedtag'){
             return $this->namedTagHack;
         }

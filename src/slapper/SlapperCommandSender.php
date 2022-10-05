@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace slapper;
 
-use InvalidArgumentException;
 use pocketmine\command\CommandSender;
 use pocketmine\lang\Language;
 use pocketmine\lang\Translatable;
@@ -56,7 +55,7 @@ class SlapperCommandSender implements CommandSender{
 
     public function setScreenLineHeight(?int $height) : void{
         if($height !== null and $height < 1){
-            throw new InvalidArgumentException("Line height must be at least 1");
+            throw new \InvalidArgumentException("Line height must be at least 1");
         }
         $this->lineHeight = $height;
     }

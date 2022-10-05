@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace slapper\entities\other;
+namespace slapper\entities;
 
 use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
@@ -12,8 +12,6 @@ use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\convert\RuntimeBlockMapping;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataCollection;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataProperties;
-
-use slapper\entities\SlapperEntity;
 
 class SlapperFallingSand extends SlapperEntity {
 

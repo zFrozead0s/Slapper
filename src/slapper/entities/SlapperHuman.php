@@ -41,17 +41,19 @@ class SlapperHuman extends Human implements SlapperInterface{
         }
         $this->version = $nbt->getString('SlapperVersion', '');
 		$this->setNameTagAlwaysVisible(true);
+		$this->setScale($nbt->getFloat('Scale', 1));
     }
 
     public function saveNBT(): CompoundTag {
         $nbt = parent::saveNBT();
         $nbt = $nbt->merge($this->namedTagHack);
+		$nbt->setFloat('Scale', $this->getScale());
         $nbt->setString('MenuName', $this->menuName);
         $commandsTag = new ListTag([], NBT::TAG_String);
-        $nbt->setTag('Commands', $commandsTag);
         foreach($this->commands as $command => $bool){
             $commandsTag->push(new StringTag($command));
         }
+		$nbt->setTag('Commands', $commandsTag);
         $nbt->setString('SlapperVersion', $this->version);
         return $nbt;
     }

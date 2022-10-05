@@ -553,7 +553,7 @@ class Main extends PluginBase implements Listener {
                                                     return true;
                                                 case "scale":
                                                 case "size":
-                                                    if (isset($args[2])) {
+                                                    if (isset($args[2]) && (float)$args[2] > 0) {
                                                         $scale = (float) $args[2];
                                                         $entity->setScale($scale);
                                                         $sender->sendMessage($this->prefix . "Updated scale.");

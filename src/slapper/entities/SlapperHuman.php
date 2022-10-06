@@ -41,6 +41,7 @@ class SlapperHuman extends Human implements SlapperInterface{
         }
         $this->version = $nbt->getString('SlapperVersion', '');
 		$this->setNameTagAlwaysVisible(true);
+		$this->setScale($nbt->getFloat('Scale', 1));
     }
 
     public function saveNBT(): CompoundTag {
@@ -48,11 +49,12 @@ class SlapperHuman extends Human implements SlapperInterface{
         $nbt = $nbt->merge($this->namedTagHack);
         $nbt->setString('MenuName', $this->menuName);
         $commandsTag = new ListTag([], NBT::TAG_String);
-        $nbt->setTag('Commands', $commandsTag);
         foreach($this->commands as $command => $bool){
             $commandsTag->push(new StringTag($command));
         }
-        $nbt->setString('SlapperVersion', $this->version);
+		$nbt->setFloat('Scale', $this->getScale());
+		$nbt->setString('SlapperVersion', $this->version);
+		$nbt->setTag('Commands', $commandsTag);
         return $nbt;
     }
 
@@ -104,6 +106,7 @@ class SlapperHuman extends Human implements SlapperInterface{
                 throw new \TypeError('Typed property ' . get_class($this) . "::\$namedtag must be " . CompoundTag::class . ', ' . gettype($value) . 'used');
             }
             $this->namedTagHack = $value;
+            return;
         }
         throw new \ErrorException('Undefined property: ' . get_class($this) . "::\$" . $name);
     }

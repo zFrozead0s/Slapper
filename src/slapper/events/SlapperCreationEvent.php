@@ -14,12 +14,9 @@ class SlapperCreationEvent extends EntityEvent {
 
     const CAUSE_COMMAND = 0;
 
-    /** @var string */
-    private $type;
-    /** @var Player|null */
-    private $creator;
-    /** @var int */
-    private $cause;
+    private string $type;
+    private ?Player $creator;
+    private int $cause;
 
 
     /**

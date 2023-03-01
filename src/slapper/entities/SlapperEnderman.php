@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace slapper\entities;
 
-use pocketmine\data\bedrock\EntityLegacyIds;
+use pocketmine\network\mcpe\protocol\types\entity\EntityIds;
 
 class SlapperEnderman extends SlapperEntity {
-
-    const TYPE_ID = EntityLegacyIds::ENDERMAN;
+    const TYPE_ID = EntityIds::ENDERMAN;
     const HEIGHT = 2.9;
-
 }

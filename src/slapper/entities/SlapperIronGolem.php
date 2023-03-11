@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace slapper\entities;
 
-use pocketmine\data\bedrock\EntityLegacyIds;
+use pocketmine\network\mcpe\protocol\types\entity\EntityIds;
 
 class SlapperIronGolem extends SlapperEntity {
-
-    const TYPE_ID = EntityLegacyIds::IRON_GOLEM;
+    const TYPE_ID = EntityIds::IRON_GOLEM;
     const HEIGHT = 2.7;
-
 }

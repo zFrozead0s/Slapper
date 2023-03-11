@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace slapper\entities;
 
-use pocketmine\data\bedrock\EntityLegacyIds;
+use pocketmine\network\mcpe\protocol\types\entity\EntityIds;
 
 class SlapperLavaSlime extends SlapperEntity {
-
-    const TYPE_ID = EntityLegacyIds::MAGMA_CUBE;
+    const TYPE_ID = EntityIds::MAGMA_CUBE;
     const HEIGHT = 0.51;
-
 }

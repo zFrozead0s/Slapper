@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace slapper\entities;
 
-use pocketmine\data\bedrock\LegacyEntityIdToStringIdMap;
+use ErrorException;
 use pocketmine\entity\Entity;
 use pocketmine\entity\EntitySizeInfo;
 use pocketmine\entity\Location;
@@ -19,20 +19,19 @@ use pocketmine\player\Player;
 use pocketmine\world\particle\FloatingTextParticle;
 use slapper\SlapperTrait;
 use slapper\SlapperInterface;
+use TypeError;
 
 class SlapperEntity extends Entity implements SlapperInterface{
     use SlapperTrait;
 
     public static function getNetworkTypeId(): string{
-        //We are using EntityLegacyIds for BC (#blamejojoe)
-        return LegacyEntityIdToStringIdMap::getInstance()->legacyToString(static::TYPE_ID) ?? throw new \LogicException(static::class . ' has invalid Entity ID');
+        return static::TYPE_ID;
     }
 
-    const TYPE_ID = 0;
+    const TYPE_ID = "";
     const HEIGHT = 0;
 
-    /** @var float */
-    public $width = 1; //BC and polyfill
+    public float $width = 1; //BC and polyfill
 
     private CompoundTag $namedTagHack;
 
@@ -83,7 +82,7 @@ class SlapperEntity extends Entity implements SlapperInterface{
     protected function sendSpawnPacket(Player $player): void {
         parent::sendSpawnPacket($player);
 
-        $this->particle->setTitle($this->getDisplayName($player));
+        $this->particle->setTitle($this->getSlapperDisplayName($player));
         $this->getWorld()->addParticle($this->location->asVector3()->add(0, static::HEIGHT, 0), $this->particle, [$player]);
     }
 
@@ -120,29 +119,29 @@ class SlapperEntity extends Entity implements SlapperInterface{
         $world = $this->getWorld();
         $particlePos = $this->location->asVector3()->add(0, static::HEIGHT, 0);
         foreach($players as $player){
-            $this->particle->setTitle($this->getDisplayName($player));
+            $this->particle->setTitle($this->getSlapperDisplayName($player));
             $world->addParticle($particlePos, $this->particle, [$player]);
         }
     }
 
     //For backwards-compatibility
-    public function __get(string $name): mixed{
+    public function __get(string $name): CompoundTag{
         if($name === 'namedtag'){
             return $this->namedTagHack;
         }
-        throw new \ErrorException("Undefined property: " . get_class($this) . "::\$" . $name);
+        throw new ErrorException("Undefined property: " . get_class($this) . "::\$" . $name);
     }
     
     //For backwards-compatibility
     public function __set(string $name, mixed $value): void{
         if($name === 'namedtag'){
             if(!$value instanceof CompoundTag){
-                throw new \TypeError('Typed property ' . get_class($this) . "::\$namedtag must be " . CompoundTag::class . ", " . gettype($value) . "used");
+                throw new TypeError('Typed property ' . get_class($this) . "::\$namedtag must be " . CompoundTag::class . ", " . gettype($value) . "used");
             }
             $this->namedTagHack = $value;
             return;
         }
-        throw new \ErrorException("Undefined property: " . get_class($this) . "::\$" . $name);
+        throw new ErrorException("Undefined property: " . get_class($this) . "::\$" . $name);
     }
 
     //For backwards-compatibility
@@ -154,4 +153,12 @@ class SlapperEntity extends Entity implements SlapperInterface{
 		parent::syncNetworkData($properties);
 		$properties->setString(EntityMetadataProperties::NAMETAG, "");
 	}
+
+    protected function getInitialDragMultiplier(): float{
+        return 0;
+    }
+
+    protected function getInitialGravity(): float{
+        return 0;
+    }
 }

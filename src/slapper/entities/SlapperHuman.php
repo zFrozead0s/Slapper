@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace slapper\entities;
 
+use ErrorException;
 use pocketmine\entity\Human;
-use pocketmine\entity\Entity;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\mcpe\convert\SkinAdapterSingleton;
 use pocketmine\network\mcpe\protocol\PlayerListPacket;
-use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataCollection;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataProperties;
 use pocketmine\network\mcpe\protocol\types\entity\MetadataProperty;
 use pocketmine\network\mcpe\protocol\types\entity\StringMetadataProperty;
@@ -20,7 +19,7 @@ use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
 use pocketmine\player\Player;
 use slapper\SlapperTrait;
 use slapper\SlapperInterface;
-
+use TypeError;
 
 class SlapperHuman extends Human implements SlapperInterface{
     use SlapperTrait;
@@ -78,12 +77,12 @@ class SlapperHuman extends Human implements SlapperInterface{
             return;
         }
         foreach($targets as $p){
-            $data[EntityMetadataProperties::NAMETAG] = new StringMetadataProperty($this->getDisplayName($p));
+            $data[EntityMetadataProperties::NAMETAG] = new StringMetadataProperty($this->getSlapperDisplayName($p));
             $p->getNetworkSession()->syncActorData($this, $data);
         }
     }
 
-    protected function sendSpawnPacket(Player $player): void {
+    protected function sendSpawnPacket(Player $player): void{
         parent::sendSpawnPacket($player);
 
         if ($this->menuName !== "") {
@@ -92,28 +91,27 @@ class SlapperHuman extends Human implements SlapperInterface{
     }
 
     //For backwards-compatibility
-    public function __get(string $name) : mixed {
+    public function __get(string $name): CompoundTag{
         if($name === 'namedtag') {
             return $this->namedTagHack;
         }
-        throw new \ErrorException('Undefined property: ' . get_class($this) . "::\$" . $name);
+        throw new ErrorException('Undefined property: ' . get_class($this) . "::\$" . $name);
     }
 
     //For backwards-compatibility
-    public function __set(string $name, mixed $value) : void {
+    public function __set(string $name, mixed $value): void{
         if($name === 'namedtag') {
             if(!$value instanceof CompoundTag) {
-                throw new \TypeError('Typed property ' . get_class($this) . "::\$namedtag must be " . CompoundTag::class . ', ' . gettype($value) . 'used');
+                throw new TypeError('Typed property ' . get_class($this) . "::\$namedtag must be " . CompoundTag::class . ', ' . gettype($value) . 'used');
             }
             $this->namedTagHack = $value;
             return;
         }
-        throw new \ErrorException('Undefined property: ' . get_class($this) . "::\$" . $name);
+        throw new ErrorException('Undefined property: ' . get_class($this) . "::\$" . $name);
     }
 
     //For backwards-compatibility
-    public function __isset(string $name) : bool {
+    public function __isset(string $name): bool{
         return $name === 'namedtag';
     }
-
 }

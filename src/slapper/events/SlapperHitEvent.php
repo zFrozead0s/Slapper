@@ -15,8 +15,7 @@ use slapper\SlapperInterface;
 class SlapperHitEvent extends EntityEvent implements Cancellable {
     use CancellableTrait;
 
-    /** @var Player */
-    private $damager;
+    private Player $damager;
 
     /** @param Entity&SlapperInterface $entity */
     public function __construct(Entity $entity, Player $damager) {

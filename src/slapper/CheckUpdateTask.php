@@ -25,14 +25,16 @@ class CheckUpdateTask extends AsyncTask {
 		$api = "";
 		if($json !== null){
 			$releases = json_decode($json->getBody(), true);
-			foreach($releases as $release){
-				if(version_compare($highestVersion, $release["version"], ">=")){
-					continue;
-				}
-				$highestVersion = $release["version"];
-				$artifactUrl = $release["artifact_url"];
-				$api = $release["api"][0]["from"] . " - " . $release["api"][0]["to"];
-			}
+            if($releases !== null) {
+                foreach ($releases as $release) {
+                    if (version_compare($highestVersion, $release["version"], ">=")) {
+                        continue;
+                    }
+                    $highestVersion = $release["version"];
+                    $artifactUrl = $release["artifact_url"];
+                    $api = $release["api"][0]["from"] . " - " . $release["api"][0]["to"];
+                }
+            }
 		}
 
 		$this->setResult([$highestVersion, $artifactUrl, $api, $err]);

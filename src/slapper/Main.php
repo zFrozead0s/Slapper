@@ -162,6 +162,7 @@ class Main extends PluginBase implements Listener {
         $this->registerEntities();
 		$this->checkUpdate();
     }
+
     public function registerEntities(): void {
         $entityFactory = EntityFactory::getInstance();
         foreach ([
@@ -620,7 +621,9 @@ class Main extends PluginBase implements Listener {
                                 return true;
                             }
 
-							$slapperClass = __NAMESPACE__ . "\\entities\\Slapper$chosenType";
+
+                            $slapperClass = __NAMESPACE__ . "\\entities\\Slapper$chosenType";
+                            /** @phpstan-ignore-next-line  */
                             Utils::testValidInstance($slapperClass, SlapperInterface::class);
 
                             $location = $sender->getLocation();

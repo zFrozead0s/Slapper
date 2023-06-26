@@ -10,7 +10,7 @@ use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\StringTag;
-use pocketmine\network\mcpe\convert\SkinAdapterSingleton;
+use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\protocol\PlayerListPacket;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataProperties;
 use pocketmine\network\mcpe\protocol\types\entity\MetadataProperty;
@@ -78,7 +78,7 @@ class SlapperHuman extends Human implements SlapperInterface{
         }
         foreach($targets as $p){
             $data[EntityMetadataProperties::NAMETAG] = new StringMetadataProperty($this->getSlapperDisplayName($p));
-            $p->getNetworkSession()->syncActorData($this, $data);
+            $p->getNetworkSession()->getEntityEventBroadcaster()->syncActorData([$p->getNetworkSession()], $this, $data);
         }
     }
 
@@ -86,7 +86,7 @@ class SlapperHuman extends Human implements SlapperInterface{
         parent::sendSpawnPacket($player);
 
         if ($this->menuName !== "") {
-            $player->getNetworkSession()->sendDataPacket(PlayerListPacket::add([PlayerListEntry::createAdditionEntry($this->getUniqueId(), $this->getId(), $this->menuName, SkinAdapterSingleton::get()->toSkinData($this->getSkin()), '')]));
+            $player->getNetworkSession()->sendDataPacket(PlayerListPacket::add([PlayerListEntry::createAdditionEntry($this->getUniqueId(), $this->getId(), $this->menuName, TypeConverter::getInstance()->getSkinAdapter()->toSkinData($this->getSkin()), '')]));
         }
     }
 

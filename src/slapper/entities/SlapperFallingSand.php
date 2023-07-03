@@ -10,7 +10,7 @@ use pocketmine\block\UnknownBlock;
 use pocketmine\block\VanillaBlocks;
 use pocketmine\entity\object\FallingBlock;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\network\mcpe\convert\RuntimeBlockMapping;
+use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\protocol\types\entity\EntityIds;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataCollection;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataProperties;
@@ -38,12 +38,13 @@ class SlapperFallingSand extends SlapperEntity {
 
     protected function syncNetworkData(EntityMetadataCollection $properties) : void{
         parent::syncNetworkData($properties);
-
-        $properties->setInt(EntityMetadataProperties::VARIANT, RuntimeBlockMapping::getInstance()->toRuntimeId($this->block->getStateId()));
+        /** @phpstan-ignore-next-line */
+        $properties->setInt(EntityMetadataProperties::VARIANT, TypeConverter::getInstance()->getBlockTranslator()->internalIdToNetworkId($this->block->getStateId()));
     }
 
     public function saveNBT(): CompoundTag {
         $nbt = parent::saveNBT();
+        /** @phpstan-ignore-next-line */
         $nbt->setTag("FallingBlock", GlobalBlockStateHandlers::getSerializer()->serialize($this->block->getStateId())->toNbt());
 
         return $nbt;
